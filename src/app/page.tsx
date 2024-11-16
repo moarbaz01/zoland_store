@@ -1,3 +1,4 @@
+import BoxBackground from "@/components/BoxBackground";
 import Banner from "@/components/Home/Banner";
 import MarqueComponent from "@/components/Home/MarqueComponent";
 import Testimonials from "@/components/Home/Testimonials";
@@ -13,7 +14,6 @@ export default function Home() {
       <TrendingGames />
       <Testimonials />
       <WhyChooseUs/>
-      <Footer/>
     </div>
   );
 }

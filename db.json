@@ -1,0 +1,42 @@
+{
+  "products": [
+    {
+      "id": "1",
+      "name": "Small Pack",
+      "description": "🔥Instant Delivery🔥Indonesian accounts will not be credited❌",
+      "isApi": true,
+      "region": "brazil",
+      "apiName": "Smile One Api",
+      "image": "/images/small-pack.jpg",
+      "isDeleted": false,
+      "category": "game",
+      "cost": [
+        {
+          "id": "212",
+          "amount": "11 Diamonds",
+          "price": "20"
+        },
+        {
+          "id": "213",
+          "amount": "22 Diamonds",
+          "price": "40"
+        },
+        {
+          "id": "212&213",
+          "amount": "33 Diamonds",
+          "price": "60"
+        },
+        {
+          "id": "214",
+          "amount": "56 Diamonds",
+          "price": "80"
+        },
+        {
+          "id": "215",
+          "amount": "112 Diamonds",
+          "price": "160"
+        }
+      ]
+    }
+  ]
+}
