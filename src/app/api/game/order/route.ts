@@ -1,18 +1,13 @@
 import axios from "axios";
-import { generateSign } from "../../../utils/hash";
 import { NextResponse } from "next/server";
-
-const API_URL = "https://www.smile.one/smilecoin/api/createorder";
-const API_KEY = "250ac95f38bf87fbd07c6550a42bd5b4";
-const UID = "2110039"; // Smile One UID
-const EMAIL = "htlianahmar@gmail.com"; // Smile One email
+import { generateSign } from "@/utils/hash";
 
 export async function POST(req: Request) {
   try {
     const body = await req.json(); // Parse incoming request body
-    const { userid, zoneid, product, productid } = body;
+    const { userId, zoneId, product, productId, amount } = body;
 
-    if (!userid || !zoneid || !product || !productid) {
+    if (!userId || !zoneId || !product || !productId || !amount) {
       return NextResponse.json(
         { error: "Missing required parameters" },
         { status: 400 }
@@ -23,23 +18,21 @@ export async function POST(req: Request) {
 
     // Build request parameters
     const params = {
-      uid: UID,
-      email: EMAIL,
-      userid,
-      zoneid,
+      uid: process.env.SMILE_ONE_UID!,
+      email: process.env.SMILE_ONE_EMAIL!,
+      userid: userId,
+      zoneid: zoneId,
       product,
-      productid,
+      productid: productId,
       time: timestamp,
     };
-    console.log("Params : ", params);
 
     // Generate the sign
-    const sign = generateSign(params, API_KEY);
-    console.log(params, sign);
+    const sign = generateSign(params, process.env.SMILE_ONE_API_KEY!);
 
     // Make the API request
     const response = await axios.post(
-      API_URL,
+      `${process.env.SMILE_ONE_API_URL!}/createorder`,
       { ...params, sign },
       { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
     );

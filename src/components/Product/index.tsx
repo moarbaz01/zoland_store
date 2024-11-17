@@ -1,7 +1,11 @@
 "use client";
 import { useCallback, useMemo, useState } from "react";
 import TopBanner from "./TopBanner";
-import { set } from "mongoose";
+import axios from "axios";
+import { useRouter } from "next/navigation";
+import { v4 as uuid } from "uuid";
+import { useSession } from "next-auth/react";
+import toast from "react-hot-toast";
 
 const Product = ({
   name,
@@ -32,6 +36,8 @@ const Product = ({
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const router = useRouter();
+  const { data: session } = useSession();
 
   const fetchCheckRole = useCallback(async () => {
     if (!userId || !zoneId) {
@@ -63,6 +69,7 @@ const Product = ({
     }
   }, [userId, zoneId, cost, region]);
 
+  // Check Role
   const handleSubmitCheckRole = async (
     e: React.SyntheticEvent<HTMLButtonElement>
   ) => {
@@ -70,6 +77,66 @@ const Product = ({
     await fetchCheckRole();
   };
 
+  // Handle Pay
+  const handlePay = useCallback(
+    async (orderId: string) => {
+      try {
+        const res = await axios.post(
+          "/api/payment/create",
+          {
+            amount: cost[amountSelected].price,
+            orderId,
+            user: session?.user,
+          },
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        const data = res.data;
+        if (data.data.code === "PAYMENT_INITIATED") {
+          router.push(data.data.data.instrumentResponse.redirectInfo.url);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    [session?.user, cost]
+  );
+
+  const createOrder = async () => {
+    if (!userId) {
+      toast.error("Please fill UserId");
+      return;
+    }
+    if (!zoneId) {
+      toast.error("Please fill ZoneId");
+      return;
+    }
+    try {
+      const res = await axios.post("/api/order", {
+        userId,
+        zoneId,
+        product: "mobilelegends",
+        productId: cost[amountSelected].id,
+        amount: cost[amountSelected].price,
+        product_db_id: id,
+        orderDetails: cost[amountSelected].amount,
+        user: session?.user,
+      });
+      const data = res.data;
+      console.log("data : ", data);
+      if (data.message === "success") {
+        console.log("data : ", data);
+        await handlePay(data.order._id);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // Calculate Total
   const total = useMemo(() => {
     return cost[amountSelected].price;
   }, [amountSelected, cost]);
@@ -89,7 +156,7 @@ const Product = ({
                     amountSelected === i
                       ? "bg-primary text-black"
                       : "bg-secondary"
-                  } cursor-pointer bg-secondary transition px-4 py-4 h-16 flex items-center`}
+                  } cursor-pointer transition px-4 py-4 h-16 flex items-center`}
                 >
                   {item.amount}
                 </div>
@@ -108,15 +175,19 @@ const Product = ({
             <h1 className="text-lg">Order Information</h1>
             <form className="flex flex-col gap-4 mt-4">
               <input
+                type="text"
                 placeholder="User ID"
                 onChange={(e) => setUserId(e.target.value)}
                 value={userId}
+                autoComplete="on"
                 className="rounded-xl bg-gray-800 border-2 focus:outline-primary focus:outline border-gray-700 py-2 px-4"
               />
               <input
+                type="text"
                 placeholder="( Zone ID )"
                 onChange={(e) => setZoneId(e.target.value)}
                 value={zoneId}
+                autoComplete="on"
                 className="rounded-xl bg-gray-800 border-2 focus:outline-primary focus:outline border-gray-700 py-2 px-4"
               />
               {message && (
@@ -146,9 +217,14 @@ const Product = ({
               <p className="text-lg">Total</p>
               <p className="text-xl font-bold">Rs. {total}</p>
             </div>
-            <button className="bg-primary w-full rounded-full p-2 text-black font-bold mt-4">
-              Pay
-            </button>
+            {session?.user && (
+              <button
+                onClick={createOrder}
+                className="bg-primary w-full rounded-full p-2 text-black font-bold mt-4"
+              >
+                Pay
+              </button>
+            )}
           </div>
 
           <div className="sm:hidden">

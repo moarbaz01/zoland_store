@@ -6,19 +6,15 @@ const paymentSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    amount: {
-      type: Number,
-      required: true,
-    },
-    date: {
-      type: Date,
-      required: true,
-    },
-    transactionId: {
+    email: {
       type: String,
       required: true,
     },
-    utrNumber: {
+    amount: {
+      type: String,
+      required: true,
+    },
+    transactionId: {
       type: String,
       required: true,
     },

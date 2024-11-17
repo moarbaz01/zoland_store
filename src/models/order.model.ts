@@ -6,6 +6,10 @@ const orderSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    email: {
+      type: String,
+      required: true,
+    },
     productId: {
       type: String,
       required: true,
@@ -15,7 +19,7 @@ const orderSchema = new mongoose.Schema(
       required: true,
     },
     orderDetails: {
-      type: String,
+      type: Object,
       required: true,
     },
     userId: {
@@ -28,17 +32,21 @@ const orderSchema = new mongoose.Schema(
     },
     paymentId: {
       type: String,
+      required: false,
+      default: "null",
+    },
+    product: {
+      type: String,
       required: true,
     },
     amount: {
-      type: Number,
+      type: String,
       required: true,
     },
     status: {
       type: String,
-      enum: ["failed", "success"],
-      default: "success",
-      required: true,
+      enum: ["pending", "success"],
+      default: "pending",
     },
   },
   { timestamps: true }
