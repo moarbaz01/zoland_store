@@ -1,11 +1,13 @@
 "use client";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
-
+import { usePathname } from "next/navigation";
 const Navbar = () => {
   const { data: session } = useSession();
-  console.log("data", session?.user);
+  const pathname = usePathname();
+
+  if (pathname.startsWith("/dashboard")) return null;
   return (
     <div className="h-16 bg-secondary flex items-center px-4 justify-center">
       <div className="max-w-screen-xl w-full m-auto flex items-center justify-between">
@@ -22,10 +24,11 @@ const Navbar = () => {
           </Link>
         ) : (
           <div className="flex items-center gap-4">
-            <Link href="/dashboard" className="">
+            <Link href="/user-dashboard" className="">
               Dashboard
             </Link>
             <Image
+              onClick={() => signOut()}
               src={session?.user?.image!}
               alt="user"
               width={30}

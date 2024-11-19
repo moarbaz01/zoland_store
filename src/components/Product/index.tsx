@@ -3,31 +3,29 @@ import { useCallback, useMemo, useState } from "react";
 import TopBanner from "./TopBanner";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { v4 as uuid } from "uuid";
 import { useSession } from "next-auth/react";
 import toast from "react-hot-toast";
 
 const Product = ({
   name,
-  id,
+  _id,
   description,
-  amount,
   image,
   region,
-  category,
   isDeleted,
   stock,
   cost,
+  game,
 }: {
   name: string;
-  id: string;
+  _id: string;
   description: string;
-  amount: string;
   image: string;
   isDeleted: boolean;
   category: string;
   stock: true;
   region: string;
+  game: string;
   cost: { id: string; amount: string; price: string }[];
 }) => {
   const [userId, setUserId] = useState("");
@@ -86,7 +84,11 @@ const Product = ({
           {
             amount: cost[amountSelected].price,
             orderId,
-            user: session?.user,
+            user: {
+              name: session?.user.name,
+              email: session?.user.email,
+              id: session?.user.id,
+            },
           },
           {
             headers: {
@@ -105,6 +107,7 @@ const Product = ({
     [session?.user, cost]
   );
 
+  // Create Order
   const createOrder = async () => {
     if (!userId) {
       toast.error("Please fill UserId");
@@ -114,16 +117,24 @@ const Product = ({
       toast.error("Please fill ZoneId");
       return;
     }
+
+    if (!stock) {
+      toast.error("Product is out of stock");
+      return;
+    }
     try {
       const res = await axios.post("/api/order", {
-        userId,
-        zoneId,
-        product: "mobilelegends",
-        productId: cost[amountSelected].id,
-        amount: cost[amountSelected].price,
-        product_db_id: id,
+        user: session?.user.id,
+        email: session?.user.email,
+        costId: cost[amountSelected].id,
         orderDetails: cost[amountSelected].amount,
-        user: session?.user,
+        gameCredentials: {
+          userId,
+          zoneId,
+          game,
+        },
+        product: _id,
+        amount: cost[amountSelected].price,
       });
       const data = res.data;
       console.log("data : ", data);
@@ -140,6 +151,14 @@ const Product = ({
   const total = useMemo(() => {
     return cost[amountSelected].price;
   }, [amountSelected, cost]);
+
+  if (isDeleted) {
+    return (
+      <div className="w-full flex justify-center items-center">
+        <h1 className="text-2xl">Product Not Found</h1>
+      </div>
+    );
+  }
   return (
     <div className="w-full">
       <TopBanner image={image} name={name} />

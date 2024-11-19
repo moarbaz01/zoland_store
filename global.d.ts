@@ -1,3 +1,5 @@
+import { Components } from "@mui/material/styles/components";
+import "@mui/material/styles";
 import "next-auth";
 
 declare module "next-auth" {
@@ -21,5 +23,15 @@ declare module "next-auth" {
     role: string;
   }
 }
+
+
+declare module "@mui/material/styles" {
+  interface Components {
+    MuiDataGrid?: {
+      styleOverrides?: Components["MuiDataGrid"]["styleOverrides"];
+    };
+  }
+}
+
 
 export {};

@@ -21,6 +21,7 @@ export const authOptions: AuthOptions = {
     pages: {
       signIn: "/login",
     },
+    secret : process.env.NEXTAUTH_SECRET!,
     callbacks: {
       async signIn({ user }: { user: any }): Promise<boolean> {
         await dbConnect();

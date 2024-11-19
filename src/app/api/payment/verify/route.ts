@@ -4,6 +4,60 @@ import axios from "axios";
 import { Order } from "@/models/order.model";
 import { Payment } from "@/models/payment.model";
 import { dbConnect } from "@/lib/database";
+import { User } from "@/models/user.model";
+
+// Generate checksum
+const generateChecksum = (
+  merchantId: string,
+  merchantTransactionId: string
+) => {
+  const string =
+    `/pg/v1/status/${merchantId}/${merchantTransactionId}` +
+    process.env.PHONEPE_SALT_KEY!;
+  const sha256 = crypto.createHash("sha256").update(string).digest("hex");
+  const checksum = sha256 + "###" + process.env.PHONEPE_SALT_INDEX!;
+  return checksum;
+};
+
+// Get Status Request
+const statusRequest = async (
+  merchantId: string,
+  merchantTransactionId: string
+) => {
+  const checksum = generateChecksum(merchantId, merchantTransactionId);
+  const url = `${process.env.PHONEPE_BASE_URL}/pg/v1/status/${merchantId}/${merchantTransactionId}`;
+  const options = {
+    method: "GET",
+    url,
+    headers: {
+      accept: "application/json",
+      "Content-Type": "application/json",
+      "X-VERIFY": checksum,
+      "X-MERCHANT-ID": merchantId,
+    },
+  };
+  const response = await axios.request(options);
+  return response.data;
+};
+
+// create game order
+const gameOrderRequest = async (order: any) => {
+  const orderResponse = await axios.post(
+    `${process.env.NEXT_PUBLIC_BASE_URL!}/api/game/order`,
+    {
+      userId: order.gameCredentials.userId,
+      zoneId: order.gameCredentials.zoneId,
+      game: order.gameCredentials.game,
+      costId: order.costId,
+    },
+    {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+  return orderResponse;
+};
 
 export async function POST(req: Request) {
   try {
@@ -15,25 +69,8 @@ export async function POST(req: Request) {
     const user = searchParams.get("user");
     const email = searchParams.get("email");
 
-    const string =
-      `/pg/v1/status/${merchantId}/${merchantTransactionId}` +
-      process.env.PHONEPE_SALT_KEY!;
-    const sha256 = crypto.createHash("sha256").update(string).digest("hex");
-    const checksum = sha256 + "###" + process.env.PHONEPE_SALT_INDEX!;
-
     // Verify Status
-    const res = await axios.get(
-      `${process.env.PHONEPE_BASE_URL}/pg/v1/status/${merchantId}/${merchantTransactionId}`,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          "X-VERIFY": checksum,
-          "X-MERCHANT-ID": merchantId,
-        },
-      }
-    );
-
-    const data = res.data;
+    const data = await statusRequest(merchantId!, merchantTransactionId!);
 
     // If checksum is valid, process the payment response
     if (!data.success) {
@@ -49,7 +86,7 @@ export async function POST(req: Request) {
       transactionId: merchantTransactionId,
       status: "success",
       amount: parseInt(data.data.amount) / 100,
-      method: data.data.paymentInstrument?.type ?? "Prepaid",
+      method: data.data.paymentInstrument?.type,
       user,
       email,
     });
@@ -65,23 +102,7 @@ export async function POST(req: Request) {
     );
 
     // Order response
-    const orderResponse = await axios.post(
-      `${process.env.NEXT_PUBLIC_BASE_URL!}/api/game/order`,
-      {
-        userId: order.userId,
-        zoneId: order.zoneId,
-        product: order.productInfo,
-        productId: order.productId,
-        amount: order.amount,
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
-
-    console.log("order res ", orderResponse);
+    const orderResponse = await gameOrderRequest(order);
 
     if (orderResponse.data.status !== "success") {
       await Order.findByIdAndDelete(orderId);
@@ -89,6 +110,12 @@ export async function POST(req: Request) {
         `${process.env.NEXT_PUBLIC_BASE_URL}/failed`
       );
     }
+
+    await User.findByIdAndUpdate(user, {
+      $push: {
+        orders: order._id,
+      },
+    });
 
     // Redirect to success page
     return NextResponse.redirect(`${process.env.NEXT_PUBLIC_BASE_URL}/success`);

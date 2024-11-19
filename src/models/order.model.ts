@@ -10,34 +10,36 @@ const orderSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    productId: {
-      type: String,
-      required: true,
-    },
-    productInfo: {
+    costId: {
       type: String,
       required: true,
     },
     orderDetails: {
-      type: Object,
-      required: true,
-    },
-    userId: {
       type: String,
       required: true,
     },
-    zoneId: {
+    gameCredentials: {
+      userId: {
+        type: String,
+      },
+      zoneId: {
+        type: String,
+      },
+      game: {
+        type: String,
+      },
+    },
+    orderType: {
       type: String,
       required: true,
     },
     paymentId: {
       type: String,
-      required: false,
-      default: "null",
+      default: null,
     },
     product: {
-      type: String,
-      required: true,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Product",
     },
     amount: {
       type: String,

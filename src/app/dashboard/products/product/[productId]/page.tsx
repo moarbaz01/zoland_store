@@ -1,4 +1,4 @@
-import Product from "@/components/Product";
+import ProductForm from "@/components/Dashboard/ProductForm";
 
 const Page = async ({ params }: { params: { productId: string } }) => {
   const { productId } = await params;
@@ -17,14 +17,8 @@ const Page = async ({ params }: { params: { productId: string } }) => {
       </div>
     );
   }
-
   const product = await response.json();
-
-  return (
-    <>
-      <Product {...product} />
-    </>
-  );
+  return <ProductForm product={product} />;
 };
 
 export default Page;

@@ -1,14 +1,34 @@
 import axios from "axios";
 import { NextResponse } from "next/server";
 import z from "zod";
-import sha256 from "crypto-js/sha256";
 import { v4 as uuid } from "uuid";
+import { generateChecksum } from "@/utils/generateChecksum";
 
 const schema = z.object({
   amount: z.string(),
   orderId: z.string(),
-  user: z.any(),
+  user: z.object({
+    id: z.string(),
+    name: z.string(),
+    email: z.string().email(),
+  }),
 });
+
+const payRequest = async (payloadMain: string, checksum: string) => {
+  const response = await axios.post(
+    `${process.env.PHONEPE_BASE_URL}/pg/v1/pay`,
+    {
+      request: payloadMain,
+    },
+    {
+      headers: {
+        "Content-Type": "application/json",
+        "X-VERIFY": checksum,
+      },
+    }
+  );
+  return response;
+};
 
 // Create PhonePe payment
 export async function POST(req: Request) {
@@ -41,30 +61,10 @@ export async function POST(req: Request) {
       paymentInstrument: { type: "PAY_PAGE" },
     };
 
-    // Create Checksum
-    const payload = JSON.stringify(data);
-    const payloadMain = Buffer.from(payload).toString("base64");
-    const string = payloadMain + "/pg/v1/pay" + process.env.PHONEPE_SALT_KEY;
-    const checksum =
-      sha256(string).toString() + "###" + process.env.PHONEPE_SALT_INDEX;
-    console.log("payloadMain : ", payloadMain);
+    const { payloadMain, checksum } = generateChecksum(data);
 
     // Fetch API
-    const response = await axios.post(
-      `${process.env.PHONEPE_BASE_URL}/pg/v1/pay`,
-      {
-        request: payloadMain,
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-          "X-VERIFY": checksum,
-        },
-      }
-    );
-
-    // Log Response
-    console.log("response ", response.data);
+    const response = await payRequest(payloadMain, checksum);
 
     // Return Response
     return NextResponse.json(

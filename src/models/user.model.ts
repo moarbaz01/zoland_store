@@ -14,7 +14,7 @@ const userSchema = new mongoose.Schema(
     },
     image: {
       type: String,
-      required: false,
+      required: true,
     },
     googleId: {
       type: String,
@@ -33,6 +33,12 @@ const userSchema = new mongoose.Schema(
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Order",
+      },
+    ],
+    payment: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Payment",
       },
     ],
     isBlocked: {

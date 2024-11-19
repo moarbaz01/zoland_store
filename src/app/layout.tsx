@@ -1,3 +1,5 @@
+// app/layout.tsx
+
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
@@ -19,13 +21,17 @@ const geistMono = localFont({
 
 export const metadata: Metadata = {
   title: "Zoland Store",
-  description: "Top-up your favoriate games by using zoland store",
+  description: "Top-up your favorite games by using Zoland store",
 };
 
 export default function RootLayout({
   children,
+  hasNavBar = true,
+  hasFooter = true, // Default to true if not passed
 }: Readonly<{
   children: React.ReactNode;
+  hasNavBar?: boolean;
+  hasFooter?: boolean;
 }>) {
   return (
     <html lang="en">
@@ -33,10 +39,10 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Provider>
-          <Toaster/>
-          <Navbar />
+          <Toaster />
+          {hasNavBar && <Navbar />} {/* Conditionally render Navbar */}
           {children}
-          <Footer />
+          {hasFooter && <Footer />}
         </Provider>
       </body>
     </html>

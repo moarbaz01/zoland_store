@@ -1,8 +1,10 @@
-// components/Footer.js
+"use client";
 import React from "react";
 import { FaHeart, FaWhatsapp, FaEnvelope } from "react-icons/fa";
-
+import { usePathname } from "next/navigation";
 const Footer = () => {
+  const pathname = usePathname();
+  if (pathname.startsWith("/dashboard")) return null;
   return (
     <>
       <footer className="text-white border-t border-gray-700 py-12 sm:px-6 px-4">

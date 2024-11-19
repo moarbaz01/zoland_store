@@ -1,147 +1,209 @@
+import { dbConnect } from "@/lib/database";
 import { Product } from "@/models/product.model";
-import { cloudinaryUpload } from "@/utils/cloudinary";
+import { cloudinary } from "@/utils/cloudinary";
 import { NextResponse } from "next/server";
-import z from "zod";
+import { z } from "zod";
 
-export async function GET(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
-  try {
-    const product = await Product.findById(params.id, { isDeleted: false });
-    if (!product) {
-      return NextResponse.json({ error: "No product found" }, { status: 404 });
-    }
-    return NextResponse.json(product);
-  } catch (error) {
-    console.log("Error :", error);
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
-    );
-  }
-}
+// Connect to the database
+dbConnect();
 
-const ProductSchema = z.object({
-  name: z.string(),
-  price: z.number(),
-  description: z.string(),
-  cost: z.string(),
-  region: z.string(),
-  isApi: z.boolean(),
-  apiName: z.string(),
-  stock: z.boolean(),
-  category: z.string(),
-  image: z.any(),
+// Zod schema for validation
+const productSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  description: z.string().min(1, "Description is required"),
+  category: z.string().min(1, "Category is required"),
+  region: z.string().min(1, "Region is required"),
+  apiName: z.string().min(1, "API Name is required"),
+  cost: z.array(
+    z.object({
+      id: z.string(),
+      price: z.string(),
+      amount: z.string(),
+    })
+  ),
+  isApi: z.boolean().optional(),
+  stock: z.boolean().optional(),
+  image: z.any(), // Image is handled separately
 });
 
+// Helper function to upload an image to Cloudinary
+async function uploadImage(file: File): Promise<string> {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", "zoland_preset"); // Replace with your preset
+
+  const response = await fetch(
+    `https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload`,
+    {
+      method: "POST",
+      body: formData,
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to upload image");
+  }
+
+  const data = await response.json();
+  return data.secure_url; // Return the uploaded image URL
+}
+
+// **POST**: Create a new product
 export async function POST(req: Request) {
   try {
-    const formdata = await req.formData();
-    const result = ProductSchema.safeParse({
-      name: formdata.get("name"),
-      price: formdata.get("price"),
-      description: formdata.get("description"),
-      cost: formdata.get("cost"),
-      region: formdata.get("region"),
-      isApi: formdata.get("isApi"),
-      apiName: formdata.get("apiName"),
-      stock: formdata.get("stock"),
-      category: formdata.get("category"),
-      image: formdata.get("image"),
+    const formData = await req.formData();
+    const rawData: Record<string, any> = {};
+    console.log(formData);
+
+    // Parse FormData
+    formData.forEach((value, key) => {
+      if (key === "cost") {
+        rawData[key] = JSON.parse(value.toString());
+      } else if (key === "image" && value instanceof File) {
+        rawData[key] = value;
+      } else if (key === "isApi") {
+        rawData[key] = value === "true";
+      } else if (key === "stock") {
+        rawData[key] = value === "true";
+      } else {
+        rawData[key] = value;
+      }
     });
 
-    if (!result.success) {
-      return NextResponse.json({ error: result.error.errors }, { status: 400 });
-    }
+    // Validate inputs
+    const validatedData = productSchema.parse(rawData);
 
-    const {
-      name,
-      price,
-      description,
-      cost,
-      region,
-      isApi,
-      apiName,
-      stock,
-      category,
-    } = result.data;
+    // Upload image to Cloudinary
+    const imageUrl = await uploadImage(validatedData.image as File);
+    validatedData.image = imageUrl;
 
-    const isProduct = await Product.findOne({ name, isDeleted: false });
-    if (isProduct) {
-      return NextResponse.json(
-        { error: "Product already exists" },
-        { status: 400 }
-      );
-    }
-
-    const uploadImage = await cloudinaryUpload(formdata.get("image") as File);
-    if (!uploadImage) {
-      return NextResponse.json(
-        { error: "Image upload failed" },
-        { status: 400 }
-      );
-    }
-    const product = await Product.create({
-      name,
-      price,
-      description,
-      cost: JSON.parse(cost),
-      region,
-      isApi,
-      apiName,
-      image: uploadImage.url,
-      stock,
-      category,
-    });
-
-    return NextResponse.json({
-      message: "Product created successfully",
-      product,
-    });
+    // Save product to the database
+    const product = await Product.create(validatedData);
+    return NextResponse.json(product, { status: 201 });
   } catch (error) {
-    console.log("Error :", error);
+    console.error("POST Error:", error);
     return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
+      { error: error.message || "Failed to create product" },
+      { status: 400 }
     );
   }
 }
 
-export async function DELETE(req: Request) {
+// **GET**: Retrieve products
+export async function GET(req: Request) {
   try {
-    const { id } = await req.json();
-    const product = await Product.findById(id);
-    if (!product) {
-      return NextResponse.json({ error: "No product found" }, { status: 404 });
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+
+    let products;
+    if (id) {
+      // Fetch a single product by ID
+      products = await Product.findById(id);
+      if (!products) {
+        return NextResponse.json(
+          { error: "Product not found" },
+          { status: 404 }
+        );
+      }
+    } else {
+      // Fetch all products (excluding deleted ones)
+      products = await Product.find({ isDeleted: false });
     }
-    product.isDeleted = true;
-    await product.save();
-    return NextResponse.json({ message: "Product deleted successfully" });
+
+    return NextResponse.json(products, { status: 200 });
   } catch (error) {
-    console.log("Error :", error);
+    console.error("GET Error:", error);
     return NextResponse.json(
-      { error: "Internal Server Error" },
+      { error: "Failed to retrieve products" },
       { status: 500 }
     );
   }
 }
 
+// **PUT**: Update a product by ID
 export async function PUT(req: Request) {
   try {
-    const { id, data } = await req.json();
+    const formData = await req.formData();
+    const id = formData.get("id")?.toString();
 
-    const product = await Product.findById(id);
-    if (!product) {
-      return NextResponse.json({ error: "No product found" }, { status: 404 });
+    if (!id) {
+      return NextResponse.json(
+        { error: "Product ID is required" },
+        { status: 400 }
+      );
     }
 
-    await Product.findByIdAndUpdate(id, data);
-    return NextResponse.json({ message: "Product updated successfully" });
+    const rawData: Record<string, any> = {};
+    formData.forEach((value, key) => {
+      if (key === "cost") {
+        rawData[key] = JSON.parse(value.toString());
+      } else if (key === "image" && value instanceof File) {
+        rawData[key] = value;
+      } else {
+        rawData[key] = value;
+      }
+    });
+
+    // Validate inputs (excluding image validation)
+    const validatedData = productSchema.partial().parse(rawData);
+
+    if (validatedData.image) {
+      // Upload new image to Cloudinary if provided
+      const imageUrl = await uploadImage(validatedData.image as File);
+      validatedData.image = imageUrl;
+    }
+
+    // Update product in the database
+    const updatedProduct = await Product.findByIdAndUpdate(id, validatedData, {
+      new: true,
+    });
+
+    if (!updatedProduct) {
+      return NextResponse.json({ error: "Product not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(updatedProduct, { status: 200 });
   } catch (error) {
-    console.log("Error :", error);
+    console.error("PUT Error:", error);
     return NextResponse.json(
-      { error: "Internal Server Error" },
+      { error: error.message || "Failed to update product" },
+      { status: 400 }
+    );
+  }
+}
+
+// **DELETE**: Soft delete a product by ID
+export async function DELETE(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json(
+        { error: "Product ID is required" },
+        { status: 400 }
+      );
+    }
+
+    // Soft delete the product
+    const deletedProduct = await Product.findByIdAndUpdate(
+      id,
+      { isDeleted: true },
+      { new: true }
+    );
+
+    if (!deletedProduct) {
+      return NextResponse.json({ error: "Product not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(
+      { message: "Product deleted successfully" },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("DELETE Error:", error);
+    return NextResponse.json(
+      { error: "Failed to delete product" },
       { status: 500 }
     );
   }

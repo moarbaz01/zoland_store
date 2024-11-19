@@ -14,6 +14,10 @@ const productSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    game: {
+      type: String,
+      required: true,
+    },
     region: {
       type: String,
       required: true,
@@ -26,7 +30,7 @@ const productSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    isApi : {
+    isApi: {
       type: Boolean,
       default: false,
     },
