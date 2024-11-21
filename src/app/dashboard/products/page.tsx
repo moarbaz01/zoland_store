@@ -1,23 +1,38 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Products from "@/components/Dashboard/Products";
+import axios from "axios";
+import Loader from "@/components/Loader";
 
-export const dynamic = "force-dynamic"; // Always fetch fresh data for dynamic behavior
+const Page = () => {
+  const [allProducts, setAllProducts] = useState([]);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-const Page = async () => {
-  try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/product`, {
-      next: { revalidate: 0 }, // Disable ISR for fresh data on each request
-    });
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await axios.get(`/api/product`);
+        if (res.status === 200) {
+          setAllProducts(res.data);
+        }
+      } catch (err) {
+        console.error("Error fetching products:", err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    if (!res.ok) {
-      throw new Error(`Failed to fetch products: ${res.statusText}`);
-    }
+    fetchProducts();
+  }, []); // Empty dependency array to run once when the component mounts
 
-    const allProducts = await res.json();
+  if (loading) {
+    return <Loader />;
+  }
 
-    return <Products allProducts={allProducts ?? []} />;
-  } catch (error) {
-    console.error("Error fetching products:", error);
-
+  if (error) {
     return (
       <div>
         <h1>Error Loading Products</h1>
@@ -28,6 +43,8 @@ const Page = async () => {
       </div>
     );
   }
+
+  return <Products allProducts={allProducts} />;
 };
 
 export default Page;

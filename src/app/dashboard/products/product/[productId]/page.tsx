@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import ProductForm from "@/components/Dashboard/ProductForm";
+import Loader from "@/components/Loader";
+import axios from "axios";
 
 const Page = ({ params }: { params: { productId: string } }) => {
   const { productId } = params;
@@ -12,14 +14,10 @@ const Page = ({ params }: { params: { productId: string } }) => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/product?id=${productId}`
-        );
-        if (!response.ok) {
-          throw new Error(`Failed to fetch product: ${response.statusText}`);
+        const response = await axios.get(`/api/product?id=${productId}`);
+        if (response.data) {
+          setProduct(response.data);
         }
-        const data = await response.json();
-        setProduct(data);
       } catch (err) {
         setError(err.message || "An error occurred");
       } finally {
@@ -31,7 +29,7 @@ const Page = ({ params }: { params: { productId: string } }) => {
   }, [productId]);
 
   if (loading) {
-    return <div>Loading Product...</div>;
+    return <Loader />;
   }
 
   if (error) {

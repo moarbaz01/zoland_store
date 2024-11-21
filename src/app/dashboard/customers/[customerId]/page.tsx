@@ -1,34 +1,47 @@
-import { notFound } from "next/navigation";
-import dynamic from "next/dynamic";
-import { Suspense } from "react";
+"use client";
+
+import { useEffect, useState } from "react";
+import axios from "axios";
 import Loader from "@/components/Loader";
+import CustomerEditForm from "@/components/Dashboard/Customers/CustomerEditForm";
 
-const CustomerEditForm = dynamic(
-  () => import("@/components/Dashboard/Customers/CustomerEditForm")
-);
+const Page = ({ params }: { params: { customerId: string } }) => {
+  const { customerId } = params;
+  const [customer, setCustomer] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-const getCustomer = async (customerId: string) => {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/user?id=${customerId}`
-  );
-  if (!res.ok) {
-    return null;
+  useEffect(() => {
+    const fetchCustomer = async () => {
+      try {
+        const res = await axios.get(`/api/user?id=${customerId}`);
+        if (res.status === 200) {
+          setCustomer(res.data);
+        }
+      } catch (err) {
+        setError(err.message || "An error occurred");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCustomer();
+  }, [customerId]);
+
+  if (loading) {
+    return <Loader />;
   }
-  return res.json();
-};
 
-const Page = async ({ params }: { params: { customerId: string } }) => {
-  const { customerId } = await params;
-  const customer = await getCustomer(customerId);
-
-  if (!customer) {
-    notFound();
+  if (error) {
+    return (
+      <div>
+        <h1>Error</h1>
+        <p>{error}</p>
+      </div>
+    );
   }
-  return (
-    <Suspense fallback={<Loader />}>
-      <CustomerEditForm customer={customer} />
-    </Suspense>
-  );
+
+  return <CustomerEditForm customer={customer} />;
 };
 
 export default Page;
