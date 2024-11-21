@@ -20,7 +20,7 @@ export default async function Home() {
     const allProducts = await products.json();
 
     return (
-      <div>
+      <div >
         <Banner />
         <MarqueComponent />
         <TrendingGames products={allProducts} />

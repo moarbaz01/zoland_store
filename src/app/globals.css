@@ -13,3 +13,25 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* Position pagination dots over the images */
+.swiper-container {
+  position: relative;
+}
+
+.swiper-pagination {
+  position: absolute;
+  bottom: 20px; /* Adjust the vertical position as needed */
+  left: 50%;
+  transform: translateX(-50%); /* Center the dots horizontally */
+  z-index: 10; /* Ensure dots are above the images */
+}
+
+/* Style the dots to make them white */
+.swiper-pagination-bullet {
+  background-color: white !important; /* Make the dots white */
+}
+
+/* Style the active dot */
+.swiper-pagination-bullet-active {
+  background-color: white !important; /* Active dot will also be white */
+}

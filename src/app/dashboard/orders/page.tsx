@@ -1,31 +1,47 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Orders from "@/components/Dashboard/Orders";
+import Loader from "@/components/Loader";
 
-export const dynamic = "force-dynamic"; // Ensure dynamic rendering for real-time data
+const Page = () => {
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-const Page = async () => {
-  try {
-    // Fetch the orders with no caching
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/order`, {
-      next: { revalidate: 0 }, // Disable ISR caching for this fetch
-    });
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/order`);
+        if (!res.ok) {
+          throw new Error(`Failed to fetch data: ${res.statusText}`);
+        }
+        const data = await res.json();
+        setOrders(data);
+      } catch (err) {
+        setError(err.message || "An unknown error occurred");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    if (!res.ok) {
-      throw new Error(`Failed to fetch data: ${res.statusText}`);
-    }
+    fetchOrders();
+  }, []);
 
-    const orders = await res.json();
+  if (loading) {
+    return <Loader />;
+  }
 
-    return <Orders allOrders={orders ?? []} />;
-  } catch (error) {
-    console.error("Error fetching orders:", error);
-
+  if (error) {
     return (
       <div>
         <h1>Failed to Load Orders</h1>
-        <p>There was an error fetching the orders. Please try again later.</p>
+        <p>{error}</p>
       </div>
     );
   }
+
+  return <Orders allOrders={orders} />;
 };
 
 export default Page;

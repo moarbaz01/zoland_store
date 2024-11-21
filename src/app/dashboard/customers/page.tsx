@@ -1,31 +1,38 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Customers from "@/components/Dashboard/Customers";
+import Loader from "@/components/Loader";
 
-// Force dynamic rendering for live API data
-export const dynamic = "force-dynamic";
+const Page = () => {
+  const [customers, setCustomers] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-const Page = async () => {
-  try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user`, {
-      next: { revalidate: 0 }, // Disable caching to fetch fresh data
-    });
+  useEffect(() => {
+    const fetchCustomers = async () => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user`);
+        const data = await res.json();
+        setCustomers(data);
+      } catch (error) {
+        console.error("Error fetching customers:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    if (!res.ok) {
-      throw new Error("Failed to fetch data");
-    }
+    fetchCustomers();
+  }, []);
 
-    const customers = await res.json();
-
-    return <Customers allCustomers={customers ?? []} />;
-  } catch (error) {
-    console.error("Error fetching customers:", error);
-
-    return (
-      <div>
-        <h1>Failed to Load Customers</h1>
-        <p>There was an error fetching customer data. Please try again later.</p>
-      </div>
-    );
-  }
+  return (
+    <div>
+      {loading ? (
+        <Loader/>
+      ) : (
+        <Customers allCustomers={customers} />
+      )}
+    </div>
+  );
 };
 
 export default Page;

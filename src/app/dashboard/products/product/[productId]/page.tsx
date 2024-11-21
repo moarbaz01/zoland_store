@@ -1,23 +1,48 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import ProductForm from "@/components/Dashboard/ProductForm";
 
-const Page = async ({ params }: { params: { productId: string } }) => {
-  const { productId } = await params;
+const Page = ({ params }: { params: { productId: string } }) => {
+  const { productId } = params;
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/product?id=${productId}`);
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/product?id=${productId}`
+        );
+        if (!response.ok) {
+          throw new Error(`Failed to fetch product: ${response.statusText}`);
+        }
+        const data = await response.json();
+        setProduct(data);
+      } catch (err) {
+        setError(err.message || "An error occurred");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  if (!response.ok) {
-    // Handle the error, such as a 404 or other HTTP status codes
-    console.error(`Failed to fetch product: ${response.statusText}`);
+    fetchProduct();
+  }, [productId]);
+
+  if (loading) {
+    return <div>Loading Product...</div>;
+  }
+
+  if (error) {
     return (
       <div>
-        <h1>Product Not Found</h1>
-        <p>
-          We couldn't find the product you're looking for. Please check the ID.
-        </p>
+        <h1>Error</h1>
+        <p>{error}</p>
       </div>
     );
   }
-  const product = await response.json();
+
   return <ProductForm product={product} />;
 };
 

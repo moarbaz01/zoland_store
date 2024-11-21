@@ -17,6 +17,7 @@ import {
   FaDollarSign,
   FaRupeeSign,
 } from "react-icons/fa";
+import toast from "react-hot-toast";
 
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
@@ -39,7 +40,7 @@ const Analytics = () => {
         console.log("Analytics data:", data);
         setAnalyticsData(data);
       } catch (error) {
-        console.error("Error fetching analytics data:", error);
+        toast.error("Error fetching analytics data:", error);
       }
     };
 

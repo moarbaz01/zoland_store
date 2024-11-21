@@ -1,5 +1,11 @@
-import CustomerEditForm from "@/components/Dashboard/Customers/CustomerEditForm";
 import { notFound } from "next/navigation";
+import dynamic from "next/dynamic";
+import { Suspense } from "react";
+import Loader from "@/components/Loader";
+
+const CustomerEditForm = dynamic(
+  () => import("@/components/Dashboard/Customers/CustomerEditForm")
+);
 
 const getCustomer = async (customerId: string) => {
   const res = await fetch(
@@ -18,7 +24,11 @@ const Page = async ({ params }: { params: { customerId: string } }) => {
   if (!customer) {
     notFound();
   }
-  return <CustomerEditForm customer={customer} />;
+  return (
+    <Suspense fallback={<Loader />}>
+      <CustomerEditForm customer={customer} />
+    </Suspense>
+  );
 };
 
 export default Page;
