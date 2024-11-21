@@ -29,7 +29,7 @@ export async function GET(req: Request) {
     const userId = url.searchParams.get("id");
 
     if (userId) {
-      const user = await User.findById(userId).populate("order");
+      const user = await User.findById(userId);
       if (!user) {
         return NextResponse.json(
           { message: "User not found" },
