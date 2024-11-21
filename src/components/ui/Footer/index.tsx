@@ -13,7 +13,7 @@ const Footer = () => {
           {/* Brand Info */}
           <div className="flex-1 w-full">
             <h2 className="text-3xl font-bold mb-4">
-              Zoland<span className="text-teal-400">Store</span>
+              Zoland<span className="text-primary">Store</span>
             </h2>
             <p className="text-md">
               Made with <FaHeart className="inline text-red-500" /> in India

@@ -20,12 +20,15 @@ import { LuLogOut, LuShoppingBag, LuUser } from "react-icons/lu";
 import axios from "axios";
 import { format } from "date-fns"; // For formatting date
 import UserEditForm from "./UserEditForm";
+import { useSelector } from "react-redux";
 
 const UserDashboard = () => {
   const { data: session } = useSession();
-  const [orders, setOrders] = useState<any[]>([]); // Default to empty array
+  const { user } = useSelector((state: any) => state.user);
+  const [orders, setOrders] = useState([]); // Default to empty array
   const [order, setOrder] = useState<"asc" | "desc">("asc");
-  const [orderBy, setOrderBy] = useState<keyof (typeof orders)[0]>("costId");
+  const [orderBy, setOrderBy] =
+    useState<keyof (typeof user.order)[0]>("costId");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [selectedTab, setSelectedTab] = useState("profile");
@@ -56,25 +59,6 @@ const UserDashboard = () => {
     setPage(0);
   };
 
-  const fetchOrders = async () => {
-    try {
-      const res = await axios.get("http://localhost:4000/orders");
-      console.log("Fetched orders:", res.data); // Log the data to check
-      if (res.data) {
-        setOrders(res.data);
-      } else {
-        setOrders([]); // If the response doesn't have orders, set empty array
-      }
-    } catch (error) {
-      console.error("Error fetching orders:", error);
-      setOrders([]); // In case of an error, set empty array
-    }
-  };
-
-  useEffect(() => {
-    fetchOrders();
-  }, []);
-
   if (!session?.user) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -82,8 +66,6 @@ const UserDashboard = () => {
       </div>
     );
   }
-
-  console.log("Orders in state:", orders); // Check orders state
 
   return (
     <div className="py-12 sm:px-6 px-4 lg:min-h-[80vh]">
@@ -104,8 +86,8 @@ const UserDashboard = () => {
                 />
               </div>
               <div className="flex flex-col gap-2">
-                <h2 className="text-xl font-bold">{session?.user?.name!}</h2>
-                <p className="text-gray-500">{session?.user?.email!}</p>
+                <h2 className="text-xl font-bold">{user?.name!}</h2>
+                <p className="text-gray-500">{user?.email!}</p>
               </div>
             </div>
 
@@ -138,7 +120,7 @@ const UserDashboard = () => {
             </h3>
             {selectedTab === "profile" ? (
               <UserEditForm />
-            ) : orders.length > 0 ? (
+            ) : user?.order.length > 0 ? (
               <>
                 <TableContainer
                   sx={{
@@ -197,7 +179,7 @@ const UserDashboard = () => {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {orders
+                      {user?.order
                         .slice(
                           page * rowsPerPage,
                           page * rowsPerPage + rowsPerPage

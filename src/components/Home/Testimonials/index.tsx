@@ -4,7 +4,7 @@ import { data } from "./data";
 
 const TestimonialItem = ({ text, name }: { text: string; name: string }) => {
   return (
-    <div className="flex flex-col items-center cursor-pointer w-[250px] sm:w-[300px] md:w-[350px] p-6 bg-black border border-white rounded-lg shadow-[0px_4px_15px_rgba(255,255,255,0.5)] transition-shadow duration-300 relative mx-4">
+    <div className="flex flex-col items-center cursor-pointer w-[250px] sm:w-[300px] md:w-[350px] p-6 bg-primary border border-white rounded-lg shadow-[0px_4px_15px_rgba(255,255,255,0.5)] transition-shadow duration-300 relative mx-4">
       <FaQuoteLeft className="text-xl absolute bottom-4 left-4 text-white opacity-30" />
       <p className="text-sm italic text-center text-white">
         &quot;{text}&quot;

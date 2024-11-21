@@ -2,14 +2,16 @@ import Image, { StaticImageData } from "next/image";
 import Link from "next/link";
 
 const GameComponent = ({
+  _id,
   name,
   image,
 }: {
+  _id: string;
   name: string;
   image: StaticImageData | string;
 }) => {
   return (
-    <Link href={"/product/1"}>
+    <Link href={`/product/${_id}`}>
       <div className="bg-secondary p-3 sm:p-4 border border-primary rounded-xl">
         <Image
           src={image}

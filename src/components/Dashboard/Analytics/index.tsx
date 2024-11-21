@@ -1,56 +1,69 @@
 "use client";
 
-import React from "react";
-import { Bar, Pie } from "react-chartjs-2";
+import React, { useEffect, useState } from "react";
+import { Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   BarElement,
   CategoryScale,
   LinearScale,
-  ArcElement,
   Tooltip,
   Legend,
 } from "chart.js";
-import { FaShoppingCart, FaBox, FaUsers, FaDollarSign } from "react-icons/fa";
+import {
+  FaShoppingCart,
+  FaBox,
+  FaUsers,
+  FaDollarSign,
+  FaRupeeSign,
+} from "react-icons/fa";
 
-ChartJS.register(
-  BarElement,
-  CategoryScale,
-  LinearScale,
-  ArcElement,
-  Tooltip,
-  Legend
-);
+ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
 const Analytics = () => {
-  const sidebarWidth = 64; // Adjust this according to your sidebar width in pixels
+  const [analyticsData, setAnalyticsData] = useState({
+    orders: 0,
+    products: 0,
+    customers: 0,
+    revenue: 0,
+    monthlySales: [],
+  });
 
-  // Dummy data
-  const stats = {
-    orders: 1200,
-    products: 340,
-    customers: 850,
-    totalSales: "$85,000",
-  };
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch("/api/analytics");
+        const data = await response.json();
+        console.log("Analytics data:", data);
+        setAnalyticsData(data);
+      } catch (error) {
+        console.error("Error fetching analytics data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const barData = {
-    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
-    datasets: [
-      {
-        label: "Sales ($)",
-        data: [5000, 8000, 6000, 9000, 12000, 15000],
-        backgroundColor: "#34D399",
-      },
+    labels: [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
     ],
-  };
-
-  const pieData = {
-    labels: ["Electronics", "Clothing", "Accessories", "Books"],
     datasets: [
       {
-        label: "Product Distribution",
-        data: [40, 30, 20, 10],
-        backgroundColor: ["#5755FE", "#F59E0B", "#34D399", "#3B82F6"],
+        label: "Sales (₹)",
+        data: analyticsData.monthlySales.map((item) => item.totalSales || 0),
+        backgroundColor: "#34D399",
       },
     ],
   };
@@ -70,7 +83,7 @@ const Analytics = () => {
           <div>
             <h2 className="text-gray-400">Orders</h2>
             <p className="text-3xl font-semibold text-gray-100">
-              {stats.orders}
+              {analyticsData.orders}
             </p>
           </div>
         </div>
@@ -81,7 +94,7 @@ const Analytics = () => {
           <div>
             <h2 className="text-gray-400">Products</h2>
             <p className="text-3xl font-semibold text-gray-100">
-              {stats.products}
+              {analyticsData.products}
             </p>
           </div>
         </div>
@@ -92,18 +105,18 @@ const Analytics = () => {
           <div>
             <h2 className="text-gray-400">Customers</h2>
             <p className="text-3xl font-semibold text-gray-100">
-              {stats.customers}
+              {analyticsData.customers}
             </p>
           </div>
         </div>
         <div className="p-4 bg-gray-800 shadow rounded-lg flex items-center space-x-4">
           <div className="bg-indigo-500 p-3 rounded-full text-white">
-            <FaDollarSign size={24} />
+            <FaRupeeSign size={24} />
           </div>
           <div>
             <h2 className="text-gray-400">Total Sales</h2>
             <p className="text-3xl font-semibold text-gray-100">
-              {stats.totalSales}
+              ₹{analyticsData.revenue}
             </p>
           </div>
         </div>
@@ -136,26 +149,6 @@ const Analytics = () => {
                 y: {
                   ticks: {
                     color: "#E5E7EB",
-                  },
-                },
-              },
-            }}
-          />
-        </div>
-
-        {/* Product Distribution Pie Chart */}
-        <div className="p-6 bg-gray-800 shadow rounded-lg">
-          <h3 className="text-lg font-bold text-gray-100 mb-4">
-            Product Distribution
-          </h3>
-          <Pie
-            data={pieData}
-            options={{
-              responsive: true,
-              plugins: {
-                legend: {
-                  labels: {
-                    color: "#E5E7EB", // Gray-100
                   },
                 },
               },

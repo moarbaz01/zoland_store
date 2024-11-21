@@ -20,7 +20,6 @@ const productSchema = new mongoose.Schema(
     },
     region: {
       type: String,
-      required: true,
     },
     isDeleted: {
       type: Boolean,
@@ -28,7 +27,6 @@ const productSchema = new mongoose.Schema(
     },
     apiName: {
       type: String,
-      required: true,
     },
     isApi: {
       type: Boolean,
@@ -45,11 +43,11 @@ const productSchema = new mongoose.Schema(
           required: true,
         },
         price: {
-          type: Number,
+          type: String, // Ensure this is defined as String
           required: true,
         },
         amount: {
-          type: String,
+          type: String, // Ensure this is defined as String
           required: true,
         },
       },

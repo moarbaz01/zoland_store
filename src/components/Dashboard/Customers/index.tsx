@@ -10,48 +10,22 @@ import {
   TableRow,
   TableSortLabel,
   TablePagination,
-  Paper,
   TextField,
   Select,
   MenuItem,
   FormControl,
   InputLabel,
   SelectChangeEvent,
+  Chip,
 } from "@mui/material";
 import { Delete, Edit } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import axios from "axios";
 
-// Dummy data for Customers
-const dummyCustomers = [
-  {
-    _id: "1",
-    name: "John Doe",
-    email: "johndoe@example.com",
-    role: "user",
-    isBlocked: false,
-    createdAt: "2024-11-01T10:00:00Z",
-  },
-  {
-    _id: "2",
-    name: "Jane Smith",
-    email: "janesmith@example.com",
-    role: "admin",
-    isBlocked: true,
-    createdAt: "2024-10-15T08:00:00Z",
-  },
-  {
-    _id: "3",
-    name: "Mike Ross",
-    email: "mikeross@example.com",
-    role: "user",
-    isBlocked: false,
-    createdAt: "2024-09-20T14:00:00Z",
-  },
-];
-
-const Customers = () => {
-  const [customers, setCustomers] = useState(dummyCustomers);
+const Customers = ({ allCustomers }) => {
+  console.log("all customers", allCustomers);
+  const [customers, setCustomers] = useState(allCustomers);
   const [orderBy, setOrderBy] = useState<string>("createdAt");
   const [orderDirection, setOrderDirection] = useState<"asc" | "desc">("asc");
   const [page, setPage] = useState(1);
@@ -75,11 +49,17 @@ const Customers = () => {
     setPage(newPage + 1);
   };
 
-  const handleDeleteUser = (id: string) => {
+  const handleDeleteUser = async (id: string) => {
     if (!confirm("Do you really wanna delete this user?")) {
-      toast.error("User not deleted");
+      return toast.error("User not deleted");
+    }
+    const endpoint = `/api/user?id=${id}`;
+    const res = await axios.delete(endpoint);
+    if (res.status === 200) {
+      toast.success("User deleted successfully!");
+      setCustomers((prev) => prev.filter((customer) => customer._id !== id));
     } else {
-      toast.success("User deleted successfully");
+      toast.error("Failed to delete user.");
     }
   };
 
@@ -129,7 +109,7 @@ const Customers = () => {
   );
 
   return (
-    <div className="ml-72 p-6">
+    <div className="md:ml-72 p-6">
       <h1 className="text-2xl font-bold mb-6">Customers</h1>
 
       {/* Filters */}
@@ -196,7 +176,13 @@ const Customers = () => {
                 </TableCell>
                 <TableCell>{customer.name}</TableCell>
                 <TableCell>{customer.email}</TableCell>
-                <TableCell>{customer.role}</TableCell>
+                <TableCell>
+                  <Chip
+                    label={customer.role === "admin" ? "Admin" : "User"}
+                    size="small"
+                    className="bg-gray-700 text-white"
+                  />
+                </TableCell>
                 <TableCell>
                   {customer.isBlocked ? "Blocked" : "Active"}
                 </TableCell>

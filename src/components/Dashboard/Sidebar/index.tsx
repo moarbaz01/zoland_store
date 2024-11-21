@@ -1,25 +1,33 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   FaTachometerAlt,
   FaBox,
   FaShoppingCart,
   FaUsers,
   FaCogs,
+  FaWallet,
 } from "react-icons/fa";
 import { HiMenuAlt1 } from "react-icons/hi"; // Hamburger icon
-
+import { Logout, Wallet } from "@mui/icons-material";
+import { signOut } from "next-auth/react";
+import toast from "react-hot-toast";
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname(); // Initialize useRouter to get the current route
-
+  const router = useRouter();
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
   };
 
-  const isActive = (path: string) => pathname === path; // Helper function to check active route
+  // Handle Logout
+  const handleLogout = () => {
+    toast.success("Successfully Logout");
+    signOut();
+    router.push("/login");
+  };
 
   // Sidebar links data
   const links = [
@@ -27,7 +35,7 @@ const Sidebar = () => {
     { href: "/dashboard/products", label: "Products", icon: FaBox },
     { href: "/dashboard/orders", label: "Orders", icon: FaShoppingCart },
     { href: "/dashboard/customers", label: "Customers", icon: FaUsers },
-    { href: "/dashboard/settings", label: "Settings", icon: FaCogs },
+    { href: "/dashboard/payments", label: "Payments", icon: FaWallet },
   ];
 
   return (
@@ -70,7 +78,7 @@ const Sidebar = () => {
                 <Link
                   href={href}
                   className={`flex items-center p-4 rounded-lg transition-colors ${
-                    isActive(href)
+                    pathname === href
                       ? "bg-gray-700 text-primary"
                       : "hover:bg-gray-700"
                   }`}
@@ -80,6 +88,15 @@ const Sidebar = () => {
                 </Link>
               </li>
             ))}
+            <li className="mt-2 cursor-pointer">
+              <div
+                onClick={handleLogout}
+                className={`flex items-center p-4 rounded-lg transition-colors hover:bg-gray-700`}
+              >
+                <Logout className="mr-4 text-lg" />
+                <span className="text-lg">Logout</span>
+              </div>
+            </li>
           </ul>
         </nav>
       </div>

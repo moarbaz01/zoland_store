@@ -13,6 +13,7 @@ const orderSchema = z.object({
   email: z.string().email("Invalid email format"),
   costId: z.string().min(1, "Cost ID is required"),
   orderDetails: z.string(), // Accepts any object
+  orderType: z.string(),
   gameCredentials: z
     .object({
       userId: z.string().optional(),
@@ -30,6 +31,7 @@ const orderSchema = z.object({
 export async function POST(req: Request) {
   try {
     const json = await req.json();
+    console.log("json : ", json);
 
     // Validate the input
     const validatedData = orderSchema.parse(json);
@@ -88,8 +90,9 @@ export async function GET(req: Request) {
 // **PUT**: Update an order by ID
 export async function PUT(req: Request) {
   try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
     const json = await req.json();
-    const id = json.id;
 
     if (!id) {
       return NextResponse.json(

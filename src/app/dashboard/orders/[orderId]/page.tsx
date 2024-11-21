@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 
 const Page = async ({ params }: { params: { orderId: string } }) => {
   const { orderId } = await params;
-  const res = await fetch(`http://localhost:4000/orders/${orderId}`);
+  const res = await fetch(`http://localhost:3000/api/order?id=${orderId}`);
 
   if (!res.ok) {
     notFound();

@@ -10,9 +10,11 @@ import {
   Divider,
   SelectChangeEvent,
 } from "@mui/material";
+import axios from "axios";
+import toast from "react-hot-toast";
 
 interface Order {
-  id: string;
+  _id: string;
   createdAt: string;
   email: string;
   product: { name: string };
@@ -34,9 +36,20 @@ const OrderView = ({ order }: { order: Order }) => {
     setStatus(event.target.value as string);
   };
 
-  const handleStatusUpdate = () => {
-    console.log("Updated Status:", status);
-    alert(`Order status updated to: ${status}`);
+  const handleStatusUpdate = async () => {
+    if (status === order.status) return;
+    try {
+      await axios.put(
+        `${process.env.NEXT_PUBLIC_API_URL}/order?id=${order._id}`,
+        {
+          status,
+        }
+      );
+      setStatus(order.status === "pending" ? "success" : "pending");
+      toast.success("Status updated successfully");
+    } catch (error) {
+      toast.error("Error updating status");
+    }
   };
 
   return (
@@ -121,7 +134,7 @@ const OrderView = ({ order }: { order: Order }) => {
                     variant="body1"
                     sx={{ fontSize: "18px", color: "#4A5568" }}
                   >
-                    {order.id}
+                    {order._id}
                   </Typography>
                 </Box>
               </Box>
@@ -217,7 +230,7 @@ const OrderView = ({ order }: { order: Order }) => {
                     variant="body1"
                     sx={{ fontSize: "16px", color: "#4A5568" }}
                   >
-                    {order.status}
+                    {status}
                   </Typography>
                 </Box>
               </Box>
@@ -480,6 +493,7 @@ const OrderView = ({ order }: { order: Order }) => {
           <Button
             onClick={handleStatusUpdate}
             variant="contained"
+            disabled={status === order.status}
             sx={{
               backgroundColor: "#3182CE",
               color: "#FFF",

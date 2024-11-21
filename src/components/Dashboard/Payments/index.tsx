@@ -19,27 +19,25 @@ import {
   SelectChangeEvent,
   Chip,
 } from "@mui/material";
-import { CgEye } from "react-icons/cg";
 import { useRouter } from "next/navigation";
 
-interface Order {
+interface Payment {
   _id: string;
   email: string;
   amount: number;
   createdAt: string;
   status: string;
-  product?: {
-    name: string;
-  };
-  orderType?: string;
+  transactionId: string;
+  method: string;
+  orderId: string;
 }
 
-interface OrdersProps {
-  allOrders: Order[];
+interface PaymentsProps {
+  allPayments: Payment[];
 }
 
-const Orders: React.FC<OrdersProps> = ({ allOrders }) => {
-  const [orders, setOrders] = useState(allOrders);
+const Payments: React.FC<PaymentsProps> = ({ allPayments }) => {
+  const [payments, setPayments] = useState(allPayments);
   const [orderDirection, setOrderDirection] = useState<"asc" | "desc">("asc");
   const [orderBy, setOrderBy] = useState<string>("createdAt");
   const [page, setPage] = useState(0);
@@ -69,54 +67,56 @@ const Orders: React.FC<OrdersProps> = ({ allOrders }) => {
   };
 
   // Filters
-  const filteredOrders = useMemo(() => {
-    if (!orders || !Array.isArray(orders)) {
-      console.error("Invalid orders array:", orders);
+  const filteredPayments = useMemo(() => {
+    if (!payments || !Array.isArray(payments)) {
+      console.error("Invalid payments array:", payments);
       return [];
     }
 
-    return orders
-      .filter((order) =>
+    return payments
+      .filter((payment) =>
         emailFilter
-          ? order.email?.toLowerCase().includes(emailFilter.toLowerCase())
+          ? payment.email?.toLowerCase().includes(emailFilter.toLowerCase())
           : true
       )
-      .filter((order) =>
+      .filter((payment) =>
         monthFilter
-          ? new Date(order.createdAt).getMonth() + 1 === Number(monthFilter)
+          ? new Date(payment.createdAt).getMonth() + 1 === Number(monthFilter)
           : true
       )
-      .filter((order) => (statusFilter ? order.status === statusFilter : true))
-      .filter((order) =>
+      .filter((payment) =>
+        statusFilter ? payment.status === statusFilter : true
+      )
+      .filter((payment) =>
         dateFilter
-          ? new Date(order.createdAt).toLocaleDateString() ===
+          ? new Date(payment.createdAt).toLocaleDateString() ===
             new Date(dateFilter).toLocaleDateString()
           : true
       );
-  }, [orders, emailFilter, monthFilter, statusFilter, dateFilter]);
+  }, [payments, emailFilter, monthFilter, statusFilter, dateFilter]);
 
   // Sorting
-  const sortedOrders = useMemo(() => {
-    return filteredOrders.sort((a, b) => {
+  const sortedPayments = useMemo(() => {
+    return filteredPayments.sort((a, b) => {
       if (b[orderBy] < a[orderBy]) return -1;
       if (b[orderBy] > a[orderBy]) return 1;
       return 0;
     });
-  }, [filteredOrders, orderBy]);
+  }, [filteredPayments, orderBy]);
 
-  // Paginated Orders
-  const currentOrders = useMemo(() => {
-    return sortedOrders.slice(page * rowsPerPage, (page + 1) * rowsPerPage);
-  }, [sortedOrders, page, rowsPerPage]);
+  // Paginated payments
+  const currentPayments = useMemo(() => {
+    return sortedPayments.slice(page * rowsPerPage, (page + 1) * rowsPerPage);
+  }, [sortedPayments, page, rowsPerPage]);
 
   return (
     <div className="md:ml-72 p-6">
-      <h1 className="text-2xl font-bold mb-6">Orders</h1>
+      <h1 className="text-2xl font-bold mb-6">payments</h1>
 
       {/* Filters */}
       <div className="mb-6 flex flex-wrap gap-4">
         <TextField
-          label="Filter by Email"
+          label="Email"
           variant="outlined"
           size="small"
           value={emailFilter}
@@ -124,13 +124,13 @@ const Orders: React.FC<OrdersProps> = ({ allOrders }) => {
           className="w-64"
         />
         <FormControl size="small" className="w-64">
-          <InputLabel>Filter by Month</InputLabel>
+          <InputLabel>Month</InputLabel>
           <Select
             value={monthFilter}
             onChange={(e: SelectChangeEvent<string>) =>
               setMonthFilter(e.target.value)
             }
-            label="Filter by Month"
+            label="Month"
           >
             <MenuItem value="">All</MenuItem>
             {Array.from({ length: 12 }, (_, i) => (
@@ -141,13 +141,13 @@ const Orders: React.FC<OrdersProps> = ({ allOrders }) => {
           </Select>
         </FormControl>
         <FormControl size="small" className="w-64">
-          <InputLabel>Filter by Status</InputLabel>
+          <InputLabel>Status</InputLabel>
           <Select
             value={statusFilter}
             onChange={(e: SelectChangeEvent<string>) =>
               setStatusFilter(e.target.value)
             }
-            label="Filter by Status"
+            label="Status"
           >
             <MenuItem value="">All</MenuItem>
             <MenuItem value="pending">Pending</MenuItem>
@@ -169,11 +169,11 @@ const Orders: React.FC<OrdersProps> = ({ allOrders }) => {
         <Table>
           <TableHead className="bg-gray-600">
             <TableRow>
-              <TableCell>OrderId</TableCell>
-              <TableCell>OrderType</TableCell>
+              <TableCell>TxnId</TableCell>
               <TableCell>Email</TableCell>
               <TableCell>Price</TableCell>
-              <TableCell>Product</TableCell>
+              <TableCell>OrderId</TableCell>
+              <TableCell>Method</TableCell>
               <TableCell>
                 <TableSortLabel
                   active={orderBy === "createdAt"}
@@ -184,35 +184,24 @@ const Orders: React.FC<OrdersProps> = ({ allOrders }) => {
                 </TableSortLabel>
               </TableCell>
               <TableCell>Status</TableCell>
-              <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {currentOrders.map((order) => (
-              <TableRow key={order._id}>
-                <TableCell>{order._id}</TableCell>
-                <TableCell>{order.orderType || "N/A"}</TableCell>
-                <TableCell>{order.email}</TableCell>
-                <TableCell>₹{order.amount}</TableCell>
-                <TableCell>{order.product?.name || "N/A"}</TableCell>
+            {currentPayments.map((payment) => (
+              <TableRow key={payment._id}>
+                <TableCell>{payment.transactionId}</TableCell>
+                <TableCell>{payment.email}</TableCell>
+                <TableCell>₹{payment.amount}</TableCell>
+                <TableCell>{payment.orderId}</TableCell>
+                <TableCell>{payment.method || "Prepaid"}</TableCell>
                 <TableCell>
-                  {new Date(order.createdAt).toLocaleString()}
+                  {new Date(payment.createdAt).toLocaleString()}
                 </TableCell>
                 <TableCell>
                   <Chip
-                    label={order.status}
-                    color={order.status === "pending" ? "warning" : "success"}
+                    label={payment.status}
+                    color={payment.status === "pending" ? "warning" : "success"}
                   />
-                </TableCell>
-                <TableCell>
-                  <button
-                    onClick={() =>
-                      router.push(`/dashboard/orders/${order._id}`)
-                    }
-                    className="px-2 py-2 bg-blue-500 rounded-full text-white"
-                  >
-                    <CgEye />
-                  </button>
                 </TableCell>
               </TableRow>
             ))}
@@ -223,7 +212,7 @@ const Orders: React.FC<OrdersProps> = ({ allOrders }) => {
       {/* Pagination */}
       <TablePagination
         component="div"
-        count={filteredOrders.length}
+        count={filteredPayments.length}
         rowsPerPage={rowsPerPage}
         page={page}
         onPageChange={handleChangePage}
@@ -234,4 +223,4 @@ const Orders: React.FC<OrdersProps> = ({ allOrders }) => {
   );
 };
 
-export default Orders;
+export default Payments;

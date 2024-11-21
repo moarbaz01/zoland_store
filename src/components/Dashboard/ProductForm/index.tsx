@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   TextField,
   Checkbox,
@@ -11,7 +11,7 @@ import {
   MenuItem,
   SelectChangeEvent,
 } from "@mui/material";
-import { Delete } from "@mui/icons-material";
+import { Add, Delete } from "@mui/icons-material";
 import axios from "axios";
 import toast from "react-hot-toast";
 
@@ -22,6 +22,7 @@ interface CostItem {
 }
 
 interface Product {
+  _id?: string;
   name: string;
   description: string;
   isApi: boolean;
@@ -37,6 +38,7 @@ interface Product {
 
 const ProductForm = ({ product }: { product?: Product }) => {
   const [formData, setFormData] = useState<Product>({
+    _id: product?._id || "",
     name: product?.name || "",
     description: product?.description || "",
     isApi: product?.isApi || false,
@@ -49,9 +51,8 @@ const ProductForm = ({ product }: { product?: Product }) => {
     cost: product?.cost || [{ id: "", amount: "", price: "" }],
     stock: product?.stock || false, // Stock as boolean
   });
-  console.log(formData);
-
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const loadingRef = useRef(null);
 
   // Preload image preview if it's a string URL
   useEffect(() => {
@@ -116,14 +117,28 @@ const ProductForm = ({ product }: { product?: Product }) => {
   const handleSubmit = async () => {
     const endpoint = `/api/product`;
 
+    if (formData.isApi) {
+      if (!formData.region || !formData.apiName) {
+        toast.error("Region and API Name are required for API products.");
+        return;
+      }
+    }
+
+    if (!product && !formData.image) {
+      toast.error("Image is required for new products.");
+      return;
+    }
+
     // Form data for the request
     const data = new FormData();
     data.append("name", formData.name);
     data.append("description", formData.description);
     data.append("isApi", JSON.stringify(formData.isApi));
-    data.append("region", formData.region); // Include region in the request
     data.append("game", formData.game);
-    data.append("apiName", formData.apiName);
+    if (formData.isApi) {
+      data.append("region", formData.region); // Include region in the request
+      data.append("apiName", formData.apiName);
+    }
     if (formData.image && typeof formData.image !== "string") {
       data.append("image", formData.image);
     }
@@ -131,8 +146,11 @@ const ProductForm = ({ product }: { product?: Product }) => {
     data.append("category", formData.category);
     data.append("stock", formData.stock.toString());
     data.append("cost", JSON.stringify(formData.cost));
-
+    if (product) {
+      data.append("id", formData._id);
+    }
     try {
+      loadingRef.current = toast.loading("Saving product...");
       const response = await axios({
         method: product ? "PUT" : "POST",
         url: endpoint,
@@ -146,6 +164,8 @@ const ProductForm = ({ product }: { product?: Product }) => {
     } catch (error) {
       console.log("Error:", error);
       toast.error("Failed to save product");
+    } finally {
+      toast.dismiss(loadingRef.current);
     }
   };
 
@@ -200,27 +220,49 @@ const ProductForm = ({ product }: { product?: Product }) => {
           />
 
           {/* API Name (Select) */}
-          <Select
-            fullWidth
-            name="apiName"
-            value={formData.apiName}
-            onChange={handleSelectChange}
-            displayEmpty
-            sx={{
-              margin: "16px 0",
-              backgroundColor: "#1F2937",
-              color: "#E5E7EB",
-            }}
-          >
-            <MenuItem value="">Select API Name</MenuItem>
-            <MenuItem value="Smile One Api">Smile One Api</MenuItem>
-          </Select>
 
           {/* Region (Select) */}
+          {formData.isApi && (
+            <>
+              {" "}
+              <Select
+                fullWidth
+                name="apiName"
+                value={formData.apiName}
+                onChange={handleSelectChange}
+                displayEmpty
+                sx={{
+                  margin: "16px 0",
+                  backgroundColor: "#1F2937",
+                  color: "#E5E7EB",
+                }}
+              >
+                <MenuItem value="">Select API Name</MenuItem>
+                <MenuItem value="Smile One Api">Smile One Api</MenuItem>
+              </Select>
+              <Select
+                fullWidth
+                name="region"
+                value={formData.region}
+                onChange={handleSelectChange}
+                displayEmpty
+                sx={{
+                  margin: "16px 0",
+                  backgroundColor: "#1F2937",
+                  color: "#E5E7EB",
+                }}
+              >
+                <MenuItem value="">Select Region</MenuItem>
+                <MenuItem value="brazil">Brazil</MenuItem>
+                <MenuItem value="phillipins">Phillipins</MenuItem>
+              </Select>
+            </>
+          )}
+          {/* Game */}
           <Select
             fullWidth
-            name="region"
-            value={formData.region}
+            name="game"
+            value={formData.game}
             onChange={handleSelectChange}
             displayEmpty
             sx={{
@@ -229,9 +271,8 @@ const ProductForm = ({ product }: { product?: Product }) => {
               color: "#E5E7EB",
             }}
           >
-            <MenuItem value="">Select Region</MenuItem>
-            <MenuItem value="brazil">Brazil</MenuItem>
-            <MenuItem value="phillipins">Phillipins</MenuItem>
+            <MenuItem value="">Select Game</MenuItem>
+            <MenuItem value="mobilelegends">MLBB</MenuItem>
           </Select>
 
           {/* Stock (Boolean) */}
@@ -290,7 +331,10 @@ const ProductForm = ({ product }: { product?: Product }) => {
 
           {/* Cost Items */}
           {formData.cost.map((costItem, index) => (
-            <div key={index} className="mb-4">
+            <div
+              key={index}
+              className="mb-4 md:flex items-center flex-row gap-4"
+            >
               {/* ID Input */}
               <TextField
                 fullWidth
@@ -342,11 +386,11 @@ const ProductForm = ({ product }: { product?: Product }) => {
             variant="contained"
             className="mb-4 bg-white "
           >
-            Add Cost Item
+            Cost Item <Add />
           </Button>
 
           {/* Submit Button */}
-          <div>
+          <div className="mt-4">
             <Button onClick={handleSubmit} color="primary" variant="contained">
               Submit
             </Button>

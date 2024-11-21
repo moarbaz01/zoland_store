@@ -52,12 +52,14 @@ const CustomerEditForm: React.FC<CustomerEditFormProps> = ({ customer }) => {
     setFormData((prev) => ({ ...prev, role: value as string }));
   };
 
+  console.log("Is Blocked", formData.isDeleted);
+
   const handleSubmit = async () => {
     const isConfirm = confirm("Are you sure?");
     if (!isConfirm) return;
 
     // New endpoint
-    const endpoint = `/api/users/$${formData._id}`;
+    const endpoint = `/api/user?id=${formData._id}`;
 
     // Response
     const res = await axios.put(

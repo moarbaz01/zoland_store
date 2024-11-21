@@ -5,12 +5,15 @@ import { TextField, Button, Paper } from "@mui/material";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useSession } from "next-auth/react";
+import { useDispatch, useSelector } from "react-redux";
+import { updateName } from "@/redux/userSlice";
 
 const UserEditForm = () => {
-  const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [id, setId] = useState("");
-  const { data: session } = useSession();
+  const { data: session, update } = useSession();
+  const { user } = useSelector((state: any) => state.user);
+  const dispatch = useDispatch();
 
   //   Handle Submit
   const handleSubmit = useCallback(async () => {
@@ -18,76 +21,72 @@ const UserEditForm = () => {
     if (!isConfirm) return;
 
     // New endpoint
-    const endpoint = `/api/users/$${id}`;
+    const endpoint = `/api/user?id=${id}`;
 
-    // Response
-    const res = await axios.put(
-      endpoint,
-      {
-        name,
-        email,
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
+    try {
+      // Response
+      const res = await axios.put(
+        endpoint,
+        {
+          name,
         },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (res.status === 200) {
+        dispatch(updateName(name));
+        toast.success("User updated successfully!");
+      } else {
+        toast.error("Failed to update customer.");
       }
-    );
-    if (res.status === 200) {
-      toast.success("Customer updated successfully!");
-    } else {
-      toast.error("Failed to update customer.");
+    } catch (error) {
+      console.error("Error updating user:", error);
+      toast.error("An error occurred while updating the user.");
     }
-  }, [name, email, id]);
+  }, [name, id, update]);
 
   //   Handle Change
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    switch (name) {
-      case "name":
-        setName(value);
-        break;
-      case "email":
-        setEmail(value);
-        break;
-      default:
-        break;
-    }
+    if (name === "name") setName(value);
   };
+
   useEffect(() => {
-    if (session?.user) {
-      setEmail(session.user.email!);
-      setName(session.user.name!);
-      setId(session.user.id!);
+    if (user) {
+      setName(user.name!);
+      setId(user._id!);
     }
-  }, [session]);
+  }, [user]);
+
   return (
     <Paper className="p-6">
-      <form>
-        {/* Name */}
-        <TextField
-          fullWidth
-          label="Name"
-          name="name"
-          value={name}
-          onChange={handleChange}
-          margin="normal"
-          variant="outlined"
-          sx={{ color: "#E5E7EB", backgroundColor: "#1F2937" }}
-        />
+      {/* Name */}
+      <TextField
+        fullWidth
+        label="Name"
+        name="name"
+        value={name}
+        onChange={handleChange}
+        margin="normal"
+        variant="outlined"
+        sx={{ color: "#E5E7EB", backgroundColor: "#1F2937" }}
+      />
 
-        {/* Submit Button */}
-        <div className="mt-4">
-          <Button
-            onClick={handleSubmit}
-            color="primary"
-            variant="contained"
-            className="bg-primary font-bold text-black"
-          >
-            Save Changes
-          </Button>
-        </div>
-      </form>
+      {/* Submit Button */}
+      <div className="mt-4">
+        <Button
+          type="button"
+          onClick={handleSubmit}
+          variant="contained"
+          className="bg-yellow-300 font-bold text-black rounded-full"
+        >
+          Save Changes
+        </Button>
+      </div>
     </Paper>
   );
 };

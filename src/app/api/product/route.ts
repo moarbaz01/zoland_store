@@ -1,6 +1,6 @@
 import { dbConnect } from "@/lib/database";
 import { Product } from "@/models/product.model";
-import { cloudinary } from "@/utils/cloudinary";
+import { cloudinary, cloudinaryUpload } from "@/utils/cloudinary";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -12,8 +12,8 @@ const productSchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string().min(1, "Description is required"),
   category: z.string().min(1, "Category is required"),
-  region: z.string().min(1, "Region is required"),
-  apiName: z.string().min(1, "API Name is required"),
+  region: z.string().optional(),
+  apiName: z.string().optional(),
   cost: z.array(
     z.object({
       id: z.string(),
@@ -21,32 +21,11 @@ const productSchema = z.object({
       amount: z.string(),
     })
   ),
+  game: z.string(),
   isApi: z.boolean().optional(),
   stock: z.boolean().optional(),
   image: z.any(), // Image is handled separately
 });
-
-// Helper function to upload an image to Cloudinary
-async function uploadImage(file: File): Promise<string> {
-  const formData = new FormData();
-  formData.append("file", file);
-  formData.append("upload_preset", "zoland_preset"); // Replace with your preset
-
-  const response = await fetch(
-    `https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload`,
-    {
-      method: "POST",
-      body: formData,
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error("Failed to upload image");
-  }
-
-  const data = await response.json();
-  return data.secure_url; // Return the uploaded image URL
-}
 
 // **POST**: Create a new product
 export async function POST(req: Request) {
@@ -58,7 +37,13 @@ export async function POST(req: Request) {
     // Parse FormData
     formData.forEach((value, key) => {
       if (key === "cost") {
-        rawData[key] = JSON.parse(value.toString());
+        const parsedCost = JSON.parse(value.toString()).map((item: any) => ({
+          id: item.id,
+          price: item.price, // Ensure it's a string
+          amount: item.amount, // Ensure it's a string
+        }));
+        console.log(typeof parsedCost);
+        rawData[key] = parsedCost;
       } else if (key === "image" && value instanceof File) {
         rawData[key] = value;
       } else if (key === "isApi") {
@@ -71,11 +56,22 @@ export async function POST(req: Request) {
     });
 
     // Validate inputs
-    const validatedData = productSchema.parse(rawData);
+    const result = productSchema.safeParse(rawData);
+    if (!result.success) {
+      const errors = result.error.errors.map((error) => ({
+        field: error.path.join("."),
+        message: error.message,
+      }));
+      return NextResponse.json({ errors }, { status: 400 });
+    }
+    const validatedData = result.data;
 
     // Upload image to Cloudinary
-    const imageUrl = await uploadImage(validatedData.image as File);
-    validatedData.image = imageUrl;
+    const { url } =
+      validatedData.image instanceof File
+        ? await cloudinaryUpload(validatedData.image)
+        : { url: validatedData.image };
+    validatedData.image = url;
 
     // Save product to the database
     const product = await Product.create(validatedData);
@@ -136,21 +132,42 @@ export async function PUT(req: Request) {
     const rawData: Record<string, any> = {};
     formData.forEach((value, key) => {
       if (key === "cost") {
-        rawData[key] = JSON.parse(value.toString());
+        const parsedCost = JSON.parse(value.toString()).map((item: any) => ({
+          id: item.id,
+          price: item.price, // Ensure it's a string
+          amount: item.amount, // Ensure it's a string
+        }));
+        console.log(typeof parsedCost);
+        rawData[key] = parsedCost;
       } else if (key === "image" && value instanceof File) {
         rawData[key] = value;
+      } else if (key === "isApi") {
+        rawData[key] = value === "true";
+      } else if (key === "stock") {
+        rawData[key] = value === "true";
       } else {
         rawData[key] = value;
       }
     });
 
     // Validate inputs (excluding image validation)
-    const validatedData = productSchema.partial().parse(rawData);
+    const result = productSchema.safeParse(rawData);
+    if (!result.success) {
+      const errors = result.error.errors.map((error) => ({
+        field: error.path.join("."),
+        message: error.message,
+      }));
+      return NextResponse.json({ errors }, { status: 400 });
+    }
+    const validatedData = result.data;
 
     if (validatedData.image) {
       // Upload new image to Cloudinary if provided
-      const imageUrl = await uploadImage(validatedData.image as File);
-      validatedData.image = imageUrl;
+      const { url } =
+        validatedData.image instanceof File
+          ? await cloudinaryUpload(validatedData.image)
+          : { url: validatedData.image };
+      validatedData.image = url;
     }
 
     // Update product in the database

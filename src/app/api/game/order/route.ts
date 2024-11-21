@@ -59,7 +59,7 @@ export async function POST(req: Request) {
     );
 
     // Check if the response from Smile One is successful
-    if (!response.data.success) {
+    if (response.data.message !== "success") {
       return NextResponse.json(
         {
           error: "Failed to create order with Smile One",

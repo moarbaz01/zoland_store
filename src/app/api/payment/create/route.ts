@@ -60,6 +60,7 @@ export async function POST(req: Request) {
       redirectMode: "POST",
       paymentInstrument: { type: "PAY_PAGE" },
     };
+    console.log(data);
 
     const { payloadMain, checksum } = generateChecksum(data);
 

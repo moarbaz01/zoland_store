@@ -22,30 +22,9 @@ import Image from "next/image";
 import toast from "react-hot-toast";
 import axios from "axios";
 
-const Products = () => {
+const Products = ({ allProducts }) => {
   const router = useRouter();
-  const initialProducts = [
-    {
-      id: "1",
-      name: "Small Pack",
-      description:
-        "🔥Instant Delivery🔥Indonesian accounts will not be credited❌",
-      isApi: true,
-      region: "brazil",
-      game: "mobilelegends",
-      apiName: "Smile One Api",
-      image: "/images/small-pack.jpg",
-      isDeleted: false,
-      category: "game",
-      cost: [
-        { id: "212", amount: "11 Diamonds", price: "20" },
-        { id: "213", amount: "22 Diamonds", price: "40" },
-      ],
-    },
-    // Add more products here if needed
-  ];
-
-  const [products, setProducts] = useState(initialProducts);
+  const [products, setProducts] = useState(allProducts);
   const [search, setSearch] = useState("");
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -67,7 +46,7 @@ const Products = () => {
       const response = await axios.delete(endpoint);
       if (response.status === 200) {
         toast.success("Product deleted successfully");
-        setProducts(products.filter((product) => product.id !== id));
+        setProducts(products.filter((product) => product._id !== id));
       } else {
         toast.error("Failed to delete product");
       }
@@ -80,7 +59,7 @@ const Products = () => {
   const filteredProducts = products.filter(
     (product) =>
       product.name.toLowerCase().includes(search.toLowerCase()) ||
-      product.id.includes(search)
+      product._id.includes(search)
   );
 
   return (
@@ -128,7 +107,7 @@ const Products = () => {
           <TableBody>
             {filteredProducts.length > 0 ? (
               filteredProducts.map((product) => (
-                <TableRow key={product.id}>
+                <TableRow key={product._id}>
                   <TableCell>
                     <Image
                       src={product.image}
@@ -138,7 +117,7 @@ const Products = () => {
                       height={50}
                     />
                   </TableCell>
-                  <TableCell sx={{ color: "#D1D5DB" }}>{product.id}</TableCell>
+                  <TableCell sx={{ color: "#D1D5DB" }}>{product._id}</TableCell>
                   <TableCell sx={{ color: "#D1D5DB" }}>
                     {product.name}
                   </TableCell>
@@ -150,13 +129,13 @@ const Products = () => {
                   </TableCell>
                   <TableCell>
                     <IconButton
-                      onClick={() => handleEdit(product.id)}
+                      onClick={() => handleEdit(product._id)}
                       sx={{ color: "#60A5FA" }}
                     >
                       <EditIcon />
                     </IconButton>
                     <IconButton
-                      onClick={() => handleDelete(product.id)}
+                      onClick={() => handleDelete(product._id)}
                       sx={{ color: "#EF4444" }}
                     >
                       <DeleteIcon />

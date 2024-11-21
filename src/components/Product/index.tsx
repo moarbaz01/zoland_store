@@ -13,6 +13,7 @@ const Product = ({
   image,
   region,
   isDeleted,
+  isApi,
   stock,
   cost,
   game,
@@ -23,6 +24,7 @@ const Product = ({
   image: string;
   isDeleted: boolean;
   category: string;
+  isApi: boolean;
   stock: true;
   region: string;
   game: string;
@@ -97,6 +99,7 @@ const Product = ({
           }
         );
         const data = res.data;
+        console.log("data : ", data);
         if (data.data.code === "PAYMENT_INITIATED") {
           router.push(data.data.data.instrumentResponse.redirectInfo.url);
         }
@@ -108,7 +111,7 @@ const Product = ({
   );
 
   // Create Order
-  const createOrder = async () => {
+  const createOrder = useCallback(async () => {
     if (!userId) {
       toast.error("Please fill UserId");
       return;
@@ -128,6 +131,7 @@ const Product = ({
         email: session?.user.email,
         costId: cost[amountSelected].id,
         orderDetails: cost[amountSelected].amount,
+        orderType: isApi ? "API Order" : "Custom Order",
         gameCredentials: {
           userId,
           zoneId,
@@ -137,15 +141,29 @@ const Product = ({
         amount: cost[amountSelected].price,
       });
       const data = res.data;
-      console.log("data : ", data);
-      if (data.message === "success") {
-        console.log("data : ", data);
-        await handlePay(data.order._id);
+      if (
+        (res.status === 201 || res.status === 200) &&
+        data.orderType === "API Order"
+      ) {
+        toast.success("Order Created");
+        await handlePay(data._id);
       }
     } catch (error) {
       console.log(error);
+      toast.error("Error Creating Order");
     }
-  };
+  }, [
+    userId,
+    zoneId,
+    cost,
+    amountSelected,
+    session?.user.id,
+    session?.user.email,
+    _id,
+    stock,
+    game,
+    handlePay,
+  ]);
 
   // Calculate Total
   const total = useMemo(() => {
@@ -173,7 +191,7 @@ const Product = ({
                   onClick={() => setAmountSelected(i)}
                   className={`rounded-xl ${
                     amountSelected === i
-                      ? "bg-primary text-black"
+                      ? "bg-white text-black"
                       : "bg-secondary"
                   } cursor-pointer transition px-4 py-4 h-16 flex items-center`}
                 >
@@ -199,7 +217,7 @@ const Product = ({
                 onChange={(e) => setUserId(e.target.value)}
                 value={userId}
                 autoComplete="on"
-                className="rounded-xl bg-gray-800 border-2 focus:outline-primary focus:outline border-gray-700 py-2 px-4"
+                className="rounded-xl bg-gray-800 border-2 focus:outline-yellow-300 focus:outline border-gray-700 py-2 px-4"
               />
               <input
                 type="text"
@@ -207,7 +225,7 @@ const Product = ({
                 onChange={(e) => setZoneId(e.target.value)}
                 value={zoneId}
                 autoComplete="on"
-                className="rounded-xl bg-gray-800 border-2 focus:outline-primary focus:outline border-gray-700 py-2 px-4"
+                className="rounded-xl bg-slate-800 border-2 focus:outline-yellow-300 border-gray-700 focus:outline py-2 px-4"
               />
               {message && (
                 <p className="text-primary my-1">Username : {message}</p>
@@ -219,7 +237,7 @@ const Product = ({
                 type="submit"
                 onClick={handleSubmitCheckRole}
                 disabled={loading}
-                className="bg-primary w-full rounded-full p-2 text-black font-bold"
+                className="bg-white w-full rounded-full p-2 text-black font-bold"
               >
                 {loading ? "Loading..." : "Check"}
               </button>
@@ -227,8 +245,8 @@ const Product = ({
           </div>
           <div className="p-4 bg-secondary rounded-xl">
             <h1 className="text-lg">Payment Mode</h1>
-            <div className="bg-primary w-full rounded-full p-2 flex items-center justify-center text-black mt-4 font-bold">
-              UPI
+            <div className="bg-white w-full rounded-full p-2 flex items-center justify-center text-black mt-4 font-bold">
+              Online
             </div>
           </div>
           <div className="p-4 bg-secondary rounded-xl ">
@@ -239,7 +257,7 @@ const Product = ({
             {session?.user && (
               <button
                 onClick={createOrder}
-                className="bg-primary w-full rounded-full p-2 text-black font-bold mt-4"
+                className="bg-yellow-300 w-full rounded-full p-2 text-black font-bold mt-4"
               >
                 Pay
               </button>

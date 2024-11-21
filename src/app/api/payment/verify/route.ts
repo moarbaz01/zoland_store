@@ -43,7 +43,7 @@ const statusRequest = async (
 // create game order
 const gameOrderRequest = async (order: any) => {
   const orderResponse = await axios.post(
-    `${process.env.NEXT_PUBLIC_BASE_URL!}/api/game/order`,
+    `${process.env.NEXT_PUBLIC_API_URL!}/game/order`,
     {
       userId: order.gameCredentials.userId,
       zoneId: order.gameCredentials.zoneId,
@@ -73,7 +73,7 @@ export async function POST(req: Request) {
     const data = await statusRequest(merchantId!, merchantTransactionId!);
 
     // If checksum is valid, process the payment response
-    if (!data.success) {
+    if (!data.status) {
       await Order.findByIdAndDelete(orderId);
       return NextResponse.redirect(
         `${process.env.NEXT_PUBLIC_BASE_URL}/failed`
@@ -104,7 +104,7 @@ export async function POST(req: Request) {
     // Order response
     const orderResponse = await gameOrderRequest(order);
 
-    if (orderResponse.data.status !== "success") {
+    if (orderResponse.data.message !== "success") {
       await Order.findByIdAndDelete(orderId);
       return NextResponse.redirect(
         `${process.env.NEXT_PUBLIC_BASE_URL}/failed`
@@ -113,7 +113,7 @@ export async function POST(req: Request) {
 
     await User.findByIdAndUpdate(user, {
       $push: {
-        orders: order._id,
+        order: order._id,
       },
     });
 
