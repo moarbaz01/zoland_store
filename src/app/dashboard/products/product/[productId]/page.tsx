@@ -3,7 +3,7 @@ import ProductForm from "@/components/Dashboard/ProductForm";
 const Page = async ({ params }: { params: { productId: string } }) => {
   const { productId } = await params;
 
-  const response = await fetch(`http://localhost:3000/api/product?id=${productId}`);
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/product?id=${productId}`);
 
   if (!response.ok) {
     // Handle the error, such as a 404 or other HTTP status codes

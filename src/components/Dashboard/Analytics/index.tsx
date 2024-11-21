@@ -32,7 +32,9 @@ const Analytics = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch("/api/analytics");
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/analytics`
+        );
         const data = await response.json();
         console.log("Analytics data:", data);
         setAnalyticsData(data);

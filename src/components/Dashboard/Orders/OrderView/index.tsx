@@ -39,12 +39,9 @@ const OrderView = ({ order }: { order: Order }) => {
   const handleStatusUpdate = async () => {
     if (status === order.status) return;
     try {
-      await axios.put(
-        `${process.env.NEXT_PUBLIC_API_URL}/order?id=${order._id}`,
-        {
-          status,
-        }
-      );
+      await axios.put(`/api/order?id=${order._id}`, {
+        status,
+      });
       setStatus(order.status === "pending" ? "success" : "pending");
       toast.success("Status updated successfully");
     } catch (error) {
