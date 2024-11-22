@@ -11,7 +11,7 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: false, // Ensure linting for production builds
   },
   output: "standalone", // Optimized for serverless deployment
-  reactStrictMode: true, // Catches potential errors during development
+  // reactStrictMode: true, // Catches potential errors during development
   swcMinify: true, // Faster builds and minified JavaScript
 };
 
