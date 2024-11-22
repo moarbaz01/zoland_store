@@ -14,11 +14,22 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // check role
+  const role = token.role;
+  if (role !== "admin") {
+    const url = req.nextUrl.clone();
+    if (url.pathname.startsWith("/dashboard")) {
+      // send to notfound page
+      url.pathname = "/notfound";
+      return NextResponse.redirect(url);
+    }
+  }
+
   // Allow the request to proceed
   return NextResponse.next();
 }
 
 // Specify the paths for middleware to run on
 export const config = {
-  matcher: ["/user-dashboard", "/dashboard", "/api"], // Apply middleware to all routes under /protected
+  matcher: ["/user-dashboard", "/dashboard", "/dashboard/:path"], // Apply middleware to all routes under /protected
 };

@@ -32,31 +32,7 @@ export async function POST(req: Request) {
     const { userId, zoneId, game, costId } = parsedData.data;
 
     // Generate timestamp for the API request
-    const timestamp = Math.floor(Date.now() / 1000);
-
-    // Build the request parameters
-    const params = {
-      uid: process.env.SMILE_ONE_UID!,
-      email: process.env.SMILE_ONE_EMAIL!,
-      userid: userId,
-      zoneid: zoneId,
-      product: game,
-      productid: costId,
-      time: timestamp,
-    };
-
-    // Generate the signature for the API request
-    const sign = generateSign(params, process.env.SMILE_ONE_API_KEY!);
-
-    // Log the request details for debugging
-    console.log("Creating order with params:", params);
-
-    // Make the API request to Smile One
-    const response = await axios.post(
-      `${process.env.SMILE_ONE_API_URL!}/createorder`,
-      { ...params, sign },
-      { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
-    );
+    
 
     // Check if the response from Smile One is successful
     if (response.data.message !== "success") {
@@ -68,6 +44,7 @@ export async function POST(req: Request) {
         { status: 500 }
       );
     }
+    console.log("Order created successfully:", response.data);
 
     // Return the successful response data
     return NextResponse.json(response.data, { status: 200 });

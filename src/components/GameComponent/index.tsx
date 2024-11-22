@@ -12,7 +12,7 @@ const GameComponent = ({
 }) => {
   return (
     <Link href={`/product/${_id}`}>
-      <div className="bg-secondary p-3 sm:p-4 border border-primary rounded-xl">
+      <div className="bg-secondary hover:opacity-80 transition p-3 sm:p-4 border border-primary rounded-xl">
         <Image
           src={image}
           alt={name}
