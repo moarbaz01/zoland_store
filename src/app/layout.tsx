@@ -1,6 +1,6 @@
 // app/layout.tsx
-
 import type { Metadata } from "next";
+import NextTopLoader from "nextjs-toploader";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/ui/Navbar";
@@ -30,7 +30,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${popins.variable} antialiased`}>
+      <body className={`${popins.variable} antialiased `}>
+        <NextTopLoader color="#ab20fd" />
         <Provider>
           <Toaster />
           {hasNavBar && <Navbar />} {/* Conditionally render Navbar */}

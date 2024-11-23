@@ -1,7 +1,8 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { dbConnect } from "@/lib/database";
 import { User } from "@/models/user.model";
+import { getToken } from "next-auth/jwt";
 
 // Zod schemas for request validation
 const createUserSchema = z.object({
@@ -29,13 +30,15 @@ export async function GET(req: Request) {
     const userId = url.searchParams.get("id");
 
     if (userId) {
-      const user = await User.findById(userId);
+      const user = await User.findById(userId)
+      console.log(user);
       if (!user) {
         return NextResponse.json(
           { message: "User not found" },
           { status: 404 }
         );
       }
+
       return NextResponse.json(user, { status: 200 });
     }
 
@@ -75,9 +78,15 @@ export async function POST(req: Request) {
   }
 }
 
-export async function PUT(req: Request) {
+export async function PUT(req: NextRequest) {
   try {
     await dbConnect();
+    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+
+    // If the user is not authenticated, return Unauthorized
+    if (!token) {
+      return NextResponse.json({ message: "Unauthorized" });
+    }
 
     const url = new URL(req.url);
     const userId = url.searchParams.get("id");
@@ -117,9 +126,19 @@ export async function PUT(req: Request) {
   }
 }
 
-export async function DELETE(req: Request) {
+export async function DELETE(req: NextRequest) {
   try {
     await dbConnect();
+    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+
+    // If the user is not authenticated, return Unauthorized
+    if (!token) {
+      return NextResponse.json({ message: "Unauthorized" });
+    }
+
+    if (token?.role !== "admin") {
+      return NextResponse.json({ message: "Unauthorized" });
+    }
 
     const url = new URL(req.url);
     const userId = url.searchParams.get("id");

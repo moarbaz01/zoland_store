@@ -1,8 +1,9 @@
 import axios from "axios";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import z from "zod";
 import { v4 as uuid } from "uuid";
 import { generateChecksum } from "@/utils/generateChecksum";
+import { getToken } from "next-auth/jwt";
 
 const schema = z.object({
   amount: z.string(),
@@ -31,8 +32,14 @@ const payRequest = async (payloadMain: string, checksum: string) => {
 };
 
 // Create PhonePe payment
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
+    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+
+    // If the user is not authenticated, return Unauthorized
+    if (!token) {
+      return NextResponse.json({ message: "Unauthorized" });
+    }
     const result = schema.safeParse({
       ...(await req.json()),
     });
@@ -54,9 +61,8 @@ export async function POST(req: Request) {
       merchantTransactionId: `T${transactionId}`,
       merchantUserId: `M${user?.name}${user?.id}`,
       redirectUrl: `${process.env
-        .NEXT_PUBLIC_BASE_URL!}/api/payment/verify?merchantTransactionId=T${transactionId}&orderId=${orderId}&user=${
-        user.id
-      }&email=${user.email}`,
+        .NEXT_PUBLIC_BASE_URL!}/api/payment/verify?merchantTransactionId=T${transactionId}&orderId=${orderId}&user=${user.id
+        }&email=${user.email}`,
       redirectMode: "POST",
       paymentInstrument: { type: "PAY_PAGE" },
     };

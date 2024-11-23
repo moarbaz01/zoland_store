@@ -50,7 +50,7 @@ const Products = ({ allProducts }) => {
         toast.error("Failed to delete product");
       }
     } catch (error) {
-      console.log(error)
+      console.log(error);
       toast.error("Failed to delete product");
     }
   };
@@ -64,7 +64,12 @@ const Products = ({ allProducts }) => {
 
   return (
     <div className="md:pl-72 p-6 min-h-screen bg-gray-900">
-      <h1 className="text-2xl font-bold text-white mb-6">Products</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-white mb-6">Products</h1>
+        <p className="text-2xl font-bold text-white mb-6">
+          Total : {products?.length || 0}
+        </p>
+      </div>
 
       {/* Search Input */}
       <div className="mb-6">

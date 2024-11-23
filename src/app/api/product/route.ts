@@ -1,7 +1,8 @@
 import { dbConnect } from "@/lib/database";
 import { Product } from "@/models/product.model";
 import { cloudinaryUpload } from "@/utils/cloudinary";
-import { NextResponse } from "next/server";
+import { getToken } from "next-auth/jwt";
+import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 // Connect to the database
@@ -28,8 +29,14 @@ const productSchema = z.object({
 });
 
 // **POST**: Create a new product
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
+    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+
+    // If the user is not authenticated, return Unauthorized
+    if (!token) {
+      return NextResponse.json({ message: "Unauthorized" });
+    }
     const formData = await req.formData();
     const rawData: Record<string, any> = {};
     console.log(formData);
@@ -117,8 +124,18 @@ export async function GET(req: Request) {
 }
 
 // **PUT**: Update a product by ID
-export async function PUT(req: Request) {
+export async function PUT(req: NextRequest) {
   try {
+    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+
+    // If the user is not authenticated, return Unauthorized
+    if (!token) {
+      return NextResponse.json({ message: "Unauthorized" });
+    }
+
+    if (token?.role !== "admin") {
+      return NextResponse.json({ message: "Unauthorized" });
+    }
     const formData = await req.formData();
     const id = formData.get("id")?.toString();
 
@@ -190,8 +207,18 @@ export async function PUT(req: Request) {
 }
 
 // **DELETE**: Soft delete a product by ID
-export async function DELETE(req: Request) {
+export async function DELETE(req: NextRequest) {
   try {
+    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+
+    // If the user is not authenticated, return Unauthorized
+    if (!token) {
+      return NextResponse.json({ message: "Unauthorized" });
+    }
+
+    if (token?.role !== "admin") {
+      return NextResponse.json({ message: "Unauthorized" });
+    }
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
 

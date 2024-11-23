@@ -1,35 +1,57 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import CustomerEditForm from "@/components/Dashboard/Customers/CustomerEditForm";
+import Loader from "@/components/Loader";
 
-type Params = Promise<{ customerId: string }>
-const Page = async ({ params }: { params: Params }) => {
-  const  customerId = (await params).customerId;
+const Page = ({ params }: { params: { customerId: string } }) => {
+  const [customer, setCustomer] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  try {
-    // Fetch the customer data from your API
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/user?id=${customerId}`,
-      {
-        cache: "no-store", // Avoid caching for dynamic content
+  useEffect(() => {
+    const fetchCustomer = async () => {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/user?id=${params.customerId}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!res.ok) {
+          setError("Failed to fetch customer data.");
+          return;
+        }
+
+        const data = await res.json();
+        setCustomer(data);
+      } catch (error) {
+        setError("An error occurred while fetching customer data.");
+        console.error(error);
+      } finally {
+        setLoading(false);
       }
-    );
+    };
 
-    if (!res.ok) {
-      throw new Error(`Failed to fetch customer: ${res.statusText}`);
-    }
+    fetchCustomer();
+  }, [params.customerId]);
 
-    const customer = await res.json();
-
-    return <CustomerEditForm customer={customer} />;
-  } catch (error) {
-    console.error("Error fetching customer:", error);
-
-    return (
-      <div>
-        <h1>Error</h1>
-        <p>Failed to load customer data. Please try again later.</p>
-      </div>
-    );
+  if (loading) {
+    return <Loader />;
   }
+
+  if (error) {
+    return <div>{error}</div>;
+  }
+
+  if (!customer) {
+    return <div>Customer not found</div>;
+  }
+
+  return <CustomerEditForm customer={customer} />;
 };
 
 export default Page;

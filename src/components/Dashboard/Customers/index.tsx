@@ -110,7 +110,12 @@ const Customers = ({ allCustomers }) => {
 
   return (
     <div className="md:ml-72 p-6">
-      <h1 className="text-2xl font-bold mb-6">Customers</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-white mb-6">Customers</h1>
+        <p className="text-2xl font-bold text-white mb-6">
+          Total : {customers?.length || 0}
+        </p>
+      </div>
 
       {/* Filters */}
       <div className="mb-6 flex space-x-6">
@@ -169,43 +174,46 @@ const Customers = ({ allCustomers }) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {currentCustomers.map((customer) => (
-              <TableRow key={customer._id}>
-                <TableCell>
-                  {new Date(customer.createdAt).toLocaleString()}
-                </TableCell>
-                <TableCell>{customer.name}</TableCell>
-                <TableCell>{customer.email}</TableCell>
-                <TableCell>
-                  <Chip
-                    label={customer.role === "admin" ? "Admin" : "User"}
-                    size="small"
-                    className="bg-gray-700 text-white"
-                  />
-                </TableCell>
-                <TableCell>
-                  {customer.isBlocked ? "Blocked" : "Active"}
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-4 md:flex-row flex-col">
-                    <button
-                      onClick={() =>
-                        router.push(`/dashboard/customers/${customer._id}`)
-                      }
-                      className="text-primary"
-                    >
-                      <Edit />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteUser(customer._id)}
-                      className="text-red-500"
-                    >
-                      <Delete />
-                    </button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
+            {currentCustomers.map(
+              (customer) =>
+                !customer?.isDeleted && (
+                  <TableRow key={customer._id}>
+                    <TableCell>
+                      {new Date(customer.createdAt).toLocaleString()}
+                    </TableCell>
+                    <TableCell>{customer.name}</TableCell>
+                    <TableCell>{customer.email}</TableCell>
+                    <TableCell>
+                      <Chip
+                        label={customer.role === "admin" ? "Admin" : "User"}
+                        size="small"
+                        className="bg-gray-700 text-white"
+                      />
+                    </TableCell>
+                    <TableCell>
+                      {customer.isBlocked ? "Blocked" : "Active"}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-4 md:flex-row flex-col">
+                        <button
+                          onClick={() =>
+                            router.push(`/dashboard/customers/${customer._id}`)
+                          }
+                          className="text-primary"
+                        >
+                          <Edit />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteUser(customer._id)}
+                          className="text-red-500"
+                        >
+                          <Delete />
+                        </button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )
+            )}
           </TableBody>
         </Table>
       </TableContainer>

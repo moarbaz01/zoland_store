@@ -1,35 +1,61 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import OrderView from "@/components/Dashboard/Orders/OrderView";
+import Loader from "@/components/Loader";
 
-type Params = Promise<{ orderId: string }>
-const Page = async ({ params }: { params: Params }) => {
-  const orderId = (await params).orderId;
+export default function Page({ params }: { params: { orderId: string } }) {
+  const [order, setOrder] = useState(null);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  try {
-    // Fetch order data from your API
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/order?id=${orderId}`,
-      {
-        cache: "no-store", // Ensure fresh data is fetched every time
+  useEffect(() => {
+    const fetchOrder = async () => {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/order?id=${params.orderId}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${process.env.NEXT_PUBLIC_BEARER_TOKEN}`,
+            },
+            cache: "no-store", // Ensure fresh data is fetched every time
+          }
+        );
+
+        if (!res.ok) {
+          throw new Error(`Failed to fetch order: ${res.statusText}`);
+        }
+
+        const data = await res.json();
+        setOrder(data);
+      } catch (err) {
+        console.error("Error fetching order:", err);
+        setError("Failed to load order data. Please try again later.");
+      } finally {
+        setLoading(false);
       }
-    );
+    };
 
-    if (!res.ok) {
-      throw new Error(`Failed to fetch order: ${res.statusText}`);
-    }
+    fetchOrder();
+  }, [params.orderId]); // Re-fetch if orderId changes
 
-    const order = await res.json();
+  if (loading) {
+    return <Loader />;
+  }
 
-    return <OrderView order={order} />;
-  } catch (error) {
-    console.error("Error fetching order:", error);
-
+  if (error) {
     return (
       <div>
         <h1>Error</h1>
-        <p>Failed to load order data. Please try again later.</p>
+        <p>{error}</p>
       </div>
     );
   }
-};
 
-export default Page;
+  if (!order) {
+    return <div>Order not found.</div>;
+  }
+
+  return <OrderView order={order} />;
+}

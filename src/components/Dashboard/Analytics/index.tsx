@@ -39,11 +39,14 @@ const Analytics = () => {
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/analytics`
         );
+        if (!response.ok) {
+          throw new Error("Failed to fetch analytics data");
+        }
         const data = await response.json();
-        console.log("Analytics data:", data);
         setAnalyticsData(data);
       } catch (error) {
-        toast.error("Error fetching analytics data:", error);
+        console.error("Error fetching analytics data:", error);
+        toast.error("Failed to fetch analytics data. Please try again.");
       }
     };
 
@@ -68,9 +71,8 @@ const Analytics = () => {
     datasets: [
       {
         label: "Sales (₹)",
-        data: analyticsData.monthlySales.map(
-          (item: any) => item.totalSales || 0
-        ),
+        data:
+          analyticsData.monthlySales?.map((item) => item.totalSales || 0) || [],
         backgroundColor: "#34D399",
       },
     ],
@@ -91,10 +93,10 @@ const Analytics = () => {
           <div>
             <h2 className="text-gray-400">Orders</h2>
             <p className="text-3xl font-semibold text-gray-100">
-              {analyticsData.orders ? (
+              {analyticsData.orders !== null ? (
                 analyticsData.orders
               ) : (
-                <CircularProgress />
+                <CircularProgress size={12} />
               )}
             </p>
           </div>
@@ -106,10 +108,10 @@ const Analytics = () => {
           <div>
             <h2 className="text-gray-400">Products</h2>
             <p className="text-3xl font-semibold text-gray-100">
-              {analyticsData.products ? (
+              {analyticsData.products !== null ? (
                 analyticsData.products
               ) : (
-                <CircularProgress />
+                <CircularProgress size={12} />
               )}
             </p>
           </div>
@@ -121,10 +123,10 @@ const Analytics = () => {
           <div>
             <h2 className="text-gray-400">Customers</h2>
             <p className="text-3xl font-semibold text-gray-100">
-              {analyticsData.customers ? (
+              {analyticsData.customers !== null ? (
                 analyticsData.customers
               ) : (
-                <CircularProgress />
+                <CircularProgress size={12} />
               )}
             </p>
           </div>
@@ -136,11 +138,10 @@ const Analytics = () => {
           <div>
             <h2 className="text-gray-400">Total Sales</h2>
             <p className="text-3xl font-semibold text-gray-100">
-              ₹
-              {analyticsData.revenue ? (
-                analyticsData.revenue.toFixed(2)
+              {analyticsData.revenue !== null ? (
+                `₹ ${analyticsData.revenue.toFixed(2)}`
               ) : (
-                <CircularProgress />
+                <CircularProgress size={12} />
               )}
             </p>
           </div>
@@ -149,36 +150,39 @@ const Analytics = () => {
 
       {/* Charts Section */}
       <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Sales Bar Chart */}
         <div className="p-6 bg-gray-800 shadow rounded-lg">
           <h3 className="text-lg font-bold text-gray-100 mb-4">
             Monthly Sales
           </h3>
-          <Bar
-            data={barData}
-            options={{
-              responsive: true,
-              plugins: {
-                legend: {
-                  labels: {
-                    color: "#E5E7EB", // Gray-100
+          <div style={{ height: "400px", width: "100%" }}>
+            <Bar
+              data={barData}
+              options={{
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: {
+                    labels: {
+                      color: "#E5E7EB",
+                    },
                   },
                 },
-              },
-              scales: {
-                x: {
-                  ticks: {
-                    color: "#E5E7EB",
+                scales: {
+                  x: {
+                    ticks: {
+                      color: "#E5E7EB",
+                    },
+                  },
+                  y: {
+                    ticks: {
+                      color: "#E5E7EB",
+                    },
                   },
                 },
-                y: {
-                  ticks: {
-                    color: "#E5E7EB",
-                  },
-                },
-              },
-            }}
-          />
+              }}
+              style={{ height: "100%" }}
+            />
+          </div>
         </div>
       </div>
     </div>

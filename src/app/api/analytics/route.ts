@@ -1,13 +1,22 @@
 import { Order } from "@/models/order.model";
 import { Product } from "@/models/product.model";
 import { User } from "@/models/user.model";
-import { NextResponse } from "next/server";
+import { getToken } from "next-auth/jwt";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+
+    // If the user is not authenticated, return Unauthorized
+    if (!token) {
+      return NextResponse.json({ message: "Unauthorized" });
+    }
     const orders = await Order.countDocuments();
     const products = await Product.countDocuments();
     const customers = await User.countDocuments();
+
+    // Calculate total revenue
     const totalRevenue = await Order.aggregate([
       {
         $group: {
@@ -16,10 +25,8 @@ export async function GET() {
         },
       },
     ]);
-    const totalOrders = await Order.find();
-    console.log("Total Orders", totalOrders);
-    console.log("Total Revenue", totalRevenue);
     const revenue = totalRevenue.length > 0 ? totalRevenue[0].total : 0;
+
     // Aggregate monthly sales
     const monthlySales = await Order.aggregate([
       {
@@ -47,17 +54,17 @@ export async function GET() {
       totalOrders: item.totalOrders,
     }));
 
-    // Respond with aggregated data
-    return NextResponse.json(
-      {
-        orders,
-        products,
-        customers,
-        revenue,
-        monthlySales: formattedMonthlySales,
-      },
-      { status: 200 }
-    );
+    // Aggregate the data into a single object
+    const data = {
+      orders,
+      products,
+      customers,
+      revenue,
+      monthlySales: formattedMonthlySales,
+    };
+
+    // Respond with the aggregated data
+    return NextResponse.json(data, { status: 200 });
   } catch (error) {
     console.error("Error fetching analytics:", error);
     return NextResponse.json(

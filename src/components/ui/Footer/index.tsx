@@ -2,6 +2,7 @@
 import React from "react";
 import { FaHeart, FaWhatsapp, FaEnvelope } from "react-icons/fa";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
 const Footer = () => {
   const pathname = usePathname();
   if (pathname.startsWith("/dashboard")) return null;
@@ -28,9 +29,9 @@ const Footer = () => {
             <div className="flex-1">
               <h2 className="text-lg font-bold mb-4">Quick Links</h2>
               <ul className="text-sm space-y-2">
-                <li>Login</li>
-                <li>Register</li>
-                <li>About Us</li>
+                <li>
+                  <Link href="/login">Login</Link>
+                </li>
               </ul>
             </div>
 
@@ -38,9 +39,15 @@ const Footer = () => {
             <div className="flex-1 ">
               <h2 className="text-lg font-bold mb-4">Important Links</h2>
               <ul className="text-sm space-y-2">
-                <li>Terms & Conditions</li>
-                <li>Privacy Policy</li>
-                <li>Refund Policy</li>
+                <li>
+                  <Link href="/termsandconditions">Terms And Conditions</Link>
+                </li>
+                <li>
+                  <Link href="/privacypolicy">Privacy Policy</Link>
+                </li>
+                <li>
+                  <Link href="/refundpolicy">Refund Policy</Link>
+                </li>
               </ul>
             </div>
           </div>

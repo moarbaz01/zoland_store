@@ -110,7 +110,12 @@ const Orders: React.FC<OrdersProps> = ({ allOrders }) => {
 
   return (
     <div className="md:ml-72 p-6">
-      <h1 className="text-2xl font-bold mb-6">Orders</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-white mb-6">Orders</h1>
+        <p className="text-2xl font-bold text-white mb-6">
+          Total : {orders?.length || 0}
+        </p>
+      </div>
 
       {/* Filters */}
       <div className="mb-6 flex flex-wrap gap-4">

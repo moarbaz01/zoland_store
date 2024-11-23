@@ -51,7 +51,7 @@ const OrderView = ({ order }: { order: Order }) => {
   };
 
   return (
-    <div className="md:pl-72 p-6 min-h-screen bg-gray-900">
+    <div className="md:pl-72 p-6 min-h-screen bg-gray-900 text-black">
       <Typography
         variant="h4"
         sx={{

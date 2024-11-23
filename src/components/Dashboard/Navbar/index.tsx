@@ -4,10 +4,10 @@ import { useState } from "react";
 import { Drawer } from "@mui/material";
 import {
   FaBox,
-  FaCogs,
   FaShoppingCart,
   FaTachometerAlt,
   FaUsers,
+  FaWallet,
 } from "react-icons/fa";
 import Link from "next/link";
 import { RxCross2 } from "react-icons/rx";
@@ -21,7 +21,7 @@ const links = [
   { href: "/dashboard/products", label: "Products", icon: FaBox },
   { href: "/dashboard/orders", label: "Orders", icon: FaShoppingCart },
   { href: "/dashboard/customers", label: "Customers", icon: FaUsers },
-  { href: "/dashboard/settings", label: "Settings", icon: FaCogs },
+  { href: "/dashboard/payments", label: "Payments", icon: FaWallet },
 ];
 
 const Navbar = () => {
@@ -47,7 +47,7 @@ const Navbar = () => {
             Zoland <span className="text-primary">Admin</span>
           </div>
           <div onClick={() => setIsOpen(true)}>
-            <IoMenu className="text-2xl text-primary" />
+            <IoMenu className="text-3xl text-primary" />
           </div>
         </div>
       </div>

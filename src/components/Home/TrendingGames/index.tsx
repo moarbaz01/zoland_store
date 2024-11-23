@@ -1,39 +1,42 @@
-"use client";
 import GameComponent from "@/components/GameComponent";
-import Loader from "@/components/Loader";
-import { useEffect, useState } from "react";
 
-const TrendingGames = () => {
-  const [products, setProducts] = useState(null);
-  const [error, setError] = useState(null);
+const fetchProducts = async () => {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/product`, {
+      cache: "no-store", // Ensures fresh data on every request
+    });
+    if (!res.ok) {
+      throw new Error("Failed to fetch data");
+    }
+    return await res.json();
+  } catch (err) {
+    console.error("Error fetching products:", err);
+    throw new Error("Failed to fetch data");
+  }
+};
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/product`);
-        if (!res.ok) throw new Error("Failed to fetch data");
-        const data = await res.json();
-        setProducts(data);
-      } catch (err) {
-        setError(err.message);
-      }
-    };
-    fetchData();
-  }, []);
+const TrendingGames = async () => {
+  let products;
 
-  if (error) {
-    return <div>Error: {error}</div>;
+  try {
+    products = await fetchProducts();
+  } catch (error) {
+    return (
+      <div className="py-12 px-4 sm:px-6">
+        <div className="max-w-screen-xl mx-auto">
+          <h2 className="text-xl font-bold text-white">TRENDING GAMES</h2>
+          <div className="text-red-500 mt-4">Error: {error.message}</div>
+        </div>
+      </div>
+    );
   }
 
-  if (!products) {
-    return <Loader />;
-  }
   return (
     <div className="py-12 px-4 sm:px-6">
       <div className="max-w-screen-xl mx-auto">
-        <h2 className="text-xl font-bold text-white ">TRENDING GAMES</h2>
+        <h2 className="text-xl font-bold text-white">TRENDING GAMES</h2>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
-          {products?.map(
+          {products.map(
             (item: { _id: string; name: string; image: string; isDeleted }) => (
               <GameComponent
                 key={item._id}

@@ -34,6 +34,7 @@ const Product = ({
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [playerAvailable, setPlayerAvailable] = useState(false);
   const router = useRouter();
   const { data: session } = useSession();
 
@@ -57,15 +58,21 @@ const Product = ({
         }),
       });
       const data = await res.json();
-      setErrorMessage("");
-      setMessage(data.username);
+      console.log(data);
+      if (data.status === 200) {
+        setPlayerAvailable(true);
+        setMessage(data.username);
+        setErrorMessage("");
+      } else {
+        setErrorMessage(data.message);
+      }
     } catch (error: any) {
       console.log(error);
       setMessage("Error found");
     } finally {
       setLoading(false);
     }
-  }, [userId, zoneId,]);
+  }, [userId, zoneId]);
 
   // Check Role
   const handleSubmitCheckRole = async (
@@ -105,7 +112,7 @@ const Product = ({
         console.log(error);
       }
     },
-    [session?.user, cost,amountSelected,router]
+    [session?.user, cost, amountSelected, router]
   );
 
   // Create Order
@@ -161,7 +168,7 @@ const Product = ({
     stock,
     game,
     handlePay,
-    isApi
+    isApi,
   ]);
 
   // Calculate Total
@@ -253,12 +260,21 @@ const Product = ({
               <p className="text-lg">Total</p>
               <p className="text-xl font-bold">Rs. {total}</p>
             </div>
-            {session?.user && (
+            {session?.user ? (
+              playerAvailable && (
+                <button
+                  onClick={createOrder}
+                  className="bg-yellow-300 w-full rounded-full p-2 text-black font-bold mt-4"
+                >
+                  Pay
+                </button>
+              )
+            ) : (
               <button
-                onClick={createOrder}
+                onClick={() => router.push("/login")}
                 className="bg-yellow-300 w-full rounded-full p-2 text-black font-bold mt-4"
               >
-                Pay
+                Login Your Account
               </button>
             )}
           </div>

@@ -3,10 +3,11 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/swiper-bundle.css";
 import { FaQuoteLeft } from "react-icons/fa";
 import { data } from "./data";
+import { Autoplay, Pagination } from "swiper/modules";
 
 const TestimonialItem = ({ text, name }: { text: string; name: string }) => {
   return (
-    <div className="flex flex-col items-center cursor-pointer p-6 bg-black border border-white rounded-lg shadow-lg transition-shadow duration-300 relative mx-auto">
+    <div className="flex flex-col items-center cursor-pointer p-6 bg-primary border border-white rounded-lg shadow-lg transition-shadow duration-300 relative mx-auto">
       <FaQuoteLeft className="text-xl absolute bottom-4 left-4 text-white opacity-30" />
       <p className="text-sm italic text-center text-white">
         &quot;{text}&quot;
@@ -40,6 +41,7 @@ const Testimonials = () => {
               slidesPerView: 3, // Display 3 slides on larger screens
             },
           }}
+          modules={[Pagination, Autoplay]}
           className="py-4"
         >
           {data.map((item, index) => (

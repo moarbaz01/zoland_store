@@ -1,24 +1,46 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import ProductForm from "@/components/Dashboard/ProductForm";
+import Loader from "@/components/Loader";
 
-export default async function Page({ params }: { params: Promise<{ productId: string }> }){
-  const productId = (await params).productId;
+export default function Page({ params }: { params: { productId: string } }) {
+  const [product, setProduct] = useState(null);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  let product = null;
-  let error = null;
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/product?id=${params.productId}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+            cache: "no-store", // Disables caching to ensure fresh data
+          }
+        );
 
-  try {
-    const res = await fetch(`/api/product?id=${productId}`, {
-      cache: "no-store",
-    });
+        if (!res.ok) {
+          throw new Error(`Failed to fetch product data: ${res.statusText}`);
+        }
 
-    if (!res.ok) {
-      throw new Error(`Failed to fetch product data: ${res.statusText}`);
-    }
+        const data = await res.json();
+        setProduct(data);
+      } catch (err) {
+        console.log(err);
+        setError("Failed to load product data. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    product = await res.json();
-  } catch (err) {
-    console.log(err);
-    error = "Failed to load product data. Please try again later.";
+    fetchProduct();
+  }, [params.productId]); // Depend on productId to re-fetch when it changes
+
+  if (loading) {
+    return <Loader />;
   }
 
   if (error) {
@@ -30,6 +52,9 @@ export default async function Page({ params }: { params: Promise<{ productId: st
     );
   }
 
-  return <ProductForm product={product} />;
-};
+  if (!product) {
+    return <div>Product not found.</div>;
+  }
 
+  return <ProductForm product={product} />;
+}

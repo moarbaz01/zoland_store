@@ -1,7 +1,8 @@
 import { dbConnect } from "@/lib/database";
 import { Order } from "@/models/order.model";
 import { Product } from "@/models/product.model";
-import { NextResponse } from "next/server";
+import { getToken } from "next-auth/jwt";
+import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 // Connect to the database
@@ -28,8 +29,15 @@ const orderSchema = z.object({
 });
 
 // **POST**: Create a new order
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
+
+    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+
+    // If the user is not authenticated, return Unauthorized
+    if (!token) {
+      return NextResponse.json({ message: "Unauthorized" });
+    }
     const json = await req.json();
     console.log("json : ", json);
 
@@ -60,8 +68,15 @@ export async function POST(req: Request) {
 }
 
 // **GET**: Retrieve orders
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   try {
+    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+
+    // If the user is not authenticated, return Unauthorized
+    if (!token) {
+      return NextResponse.json({ message: "Unauthorized" });
+    }
+
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
 
@@ -88,8 +103,18 @@ export async function GET(req: Request) {
 }
 
 // **PUT**: Update an order by ID
-export async function PUT(req: Request) {
+export async function PUT(req: NextRequest) {
   try {
+    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+
+    // If the user is not authenticated, return Unauthorized
+    if (!token) {
+      return NextResponse.json({ message: "Unauthorized" });
+    }
+
+    if (token?.role !== "admin") {
+      return NextResponse.json({ message: "Unauthorized" });
+    }
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
     const json = await req.json();
@@ -124,8 +149,18 @@ export async function PUT(req: Request) {
 }
 
 // **DELETE**: Delete an order by ID
-export async function DELETE(req: Request) {
+export async function DELETE(req: NextRequest) {
   try {
+    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+
+    // If the user is not authenticated, return Unauthorized
+    if (!token) {
+      return NextResponse.json({ message: "Unauthorized" });
+    }
+    console.log("token : ", token);
+    if (token?.role !== "admin") {
+      return NextResponse.json({ message: "Unauthorized" });
+    }
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
 

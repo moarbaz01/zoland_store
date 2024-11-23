@@ -14,19 +14,18 @@ import {
   CircularProgress,
   Chip,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LuLogOut, LuShoppingBag, LuUser } from "react-icons/lu";
-import { format } from "date-fns"; // For formatting date
 import UserEditForm from "./UserEditForm";
 import { useSelector } from "react-redux";
+import axios from "axios";
 
 const UserDashboard = () => {
   const { data: session } = useSession();
   const { user } = useSelector((state: any) => state.user);
-  const [orders, setOrders] = useState([]); // Default to empty array
+  const [orders, setOrders] = useState<any[]>([]); // Default to empty array
   const [order, setOrder] = useState<"asc" | "desc">("asc");
-  const [orderBy, setOrderBy] =
-    useState<keyof (typeof user.order)[0]>("costId");
+  const [orderBy, setOrderBy] = useState<keyof (typeof orders)[0]>("costId");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [selectedTab, setSelectedTab] = useState("profile");
@@ -56,6 +55,22 @@ const UserDashboard = () => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      const res = await axios.get("/api/order");
+      if (res.status === 200) {
+        const filterData = res.data.filter(
+          (item: any) => item.user === session?.user?.id
+        );
+        if (filterData.length > 0) {
+          setOrders(filterData);
+        }
+        console.log(filterData);
+      }
+    };
+    fetchOrders();
+  }, [session?.user.id]);
 
   if (!session?.user) {
     return (
@@ -118,7 +133,7 @@ const UserDashboard = () => {
             </h3>
             {selectedTab === "profile" ? (
               <UserEditForm />
-            ) : user?.order.length > 0 ? (
+            ) : orders?.length > 0 ? (
               <>
                 <TableContainer
                   sx={{
@@ -177,21 +192,23 @@ const UserDashboard = () => {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {user?.order
+                      {orders
                         .slice(
                           page * rowsPerPage,
                           page * rowsPerPage + rowsPerPage
                         )
                         .map((order) => (
-                          <TableRow key={order.costId}>
-                            <TableCell>{order.costId}</TableCell>
-                            <TableCell align="right">{order.amount}</TableCell>
+                          <TableRow key={order._id}>
+                            <TableCell>{order?._id}</TableCell>
                             <TableCell align="right">
-                              {order.gameCredentials.game}
+                              ₹{order?.amount}
+                            </TableCell>
+                            <TableCell align="right">
+                              {order?.gameCredentials?.game}
                             </TableCell>
                             <TableCell align="right">
                               <Chip
-                                label={order.status}
+                                label={order?.status}
                                 color={
                                   order.status === "success"
                                     ? "success"
@@ -205,10 +222,7 @@ const UserDashboard = () => {
                               sx={{ textWrap: "nowrap" }}
                               align="right"
                             >
-                              {format(
-                                new Date(order.createdAt),
-                                "yyyy-MM-dd HH:mm"
-                              )}
+                              {new Date(order?.createdAt).toLocaleString()}
                             </TableCell>
                           </TableRow>
                         ))}
@@ -218,7 +232,7 @@ const UserDashboard = () => {
                 <TablePagination
                   rowsPerPageOptions={[5, 10, 25]}
                   component="div"
-                  count={orders.length}
+                  count={orders?.length}
                   rowsPerPage={rowsPerPage}
                   page={page}
                   onPageChange={handleChangePage}

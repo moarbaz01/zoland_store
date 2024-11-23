@@ -7,11 +7,9 @@ import { dbConnect } from "@/lib/database";
 import { User } from "@/models/user.model";
 import { generateSign } from "@/utils/hash";
 
+
 // Generate checksum
-const generateChecksum = (
-  merchantId: string,
-  merchantTransactionId: string
-) => {
+const generateChecksum = (merchantId: string, merchantTransactionId: string) => {
   const string =
     `/pg/v1/status/${merchantId}/${merchantTransactionId}` +
     process.env.PHONEPE_SALT_KEY!;
@@ -21,12 +19,7 @@ const generateChecksum = (
 };
 
 // Get Status Request
-const statusRequest = async (
-  merchantId: string,
-  merchantTransactionId: string
-) => {
-  console.log("merchantId", merchantId);
-  console.log("merchantTransactionId", merchantTransactionId);
+const statusRequest = async (merchantId: string, merchantTransactionId: string) => {
   const checksum = generateChecksum(merchantId, merchantTransactionId);
   const url = `${process.env.PHONEPE_BASE_URL}/pg/v1/status/${merchantId}/${merchantTransactionId}`;
   const options = {
@@ -40,43 +33,28 @@ const statusRequest = async (
     },
   };
   const response = await axios.request(options);
-  console.log("response", response.data);
   return response.data;
 };
 
-// create game order
 const gameOrderRequest = async (order: any) => {
-  console.log("order", order);
   const timestamp = Math.floor(Date.now() / 1000);
-
-  // Build the request parameters
   const params = {
     uid: process.env.SMILE_ONE_UID!,
     email: process.env.SMILE_ONE_EMAIL!,
     userid: order.gameCredentials.userId,
     zoneid: order.gameCredentials.zoneId,
     product: order.gameCredentials.game,
-    productid: "13",
+    productid: order.costId,
     time: timestamp,
   };
-
-  // Generate the signature for the API request
   const sign = generateSign(params, process.env.SMILE_ONE_API_KEY!);
-
-  // Log the request details for debugging
-  console.log("Creating order with params:", params);
-
-  // Make the API request to Smile One
   const res = await axios.post(
     `${process.env.SMILE_ONE_API_URL!}/createorder`,
     { ...params, sign },
     { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
   );
-
-  console.log("game order response", res.data);
-
   if (res.data.message !== "success") {
-    return null;
+    return { result: null, message: res.data.message };
   }
   return res.data;
 };
@@ -93,19 +71,17 @@ export async function POST(req: Request) {
 
     // Verify Status
     const data = await statusRequest(merchantId!, merchantTransactionId!);
-    console.log("DATA", data);
-    console.log("Request URL:", req.url);
-    const reqUrl = new URL(`${process.env.NEXT_PUBLIC_BASE_URL}/success`);
 
-    // If checksum is valid, process the payment response
+    // If payment failed
     if (!data.success) {
       await Order.findByIdAndDelete(orderId);
       return NextResponse.redirect(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/failed`
-      );
+        new URL(`/failed?message=Payment Failed`, process.env.NEXT_PUBLIC_BASE_URL!),
+        { status: 302 }  // Explicitly setting status as 302 (default)
+      );  // Explicitly setting status as 302 (default
     }
 
-    // Create Payment
+    // Create Payment record
     const payment = await Payment.create({
       orderId: orderId,
       transactionId: merchantTransactionId,
@@ -126,29 +102,29 @@ export async function POST(req: Request) {
       { new: true }
     );
 
-    console.log("Order in verify", order);
-
-    // Order response
+    // Create game order
     const orderResponse = await gameOrderRequest(order);
-    console.log("Order Response", orderResponse);
-
-    if (!orderResponse) {
+    if (!orderResponse?.result) {
       await Order.findByIdAndDelete(orderId);
       return NextResponse.redirect(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/failed`
+        new URL(`/failed?message="Top-UP Failed"}`, process.env.NEXT_PUBLIC_BASE_URL!),
+        { status: 302 }  // Explicitly setting status as 302 (default)
       );
     }
 
+    // Update User's order history
     await User.findByIdAndUpdate(user, {
       $push: {
         order: order._id,
       },
     });
 
-    // Redirect to success page
-    return NextResponse.redirect(reqUrl);
+    // Redirection on success
+    return NextResponse.redirect(
+      new URL(`/success?transactionId=${merchantTransactionId}&message=success`, process.env.NEXT_PUBLIC_BASE_URL!),
+      { status: 302 }  // Explicitly setting status as 302 (default)
+    );
   } catch (error: any) {
-    console.log(error);
     console.error("Error in payment callback:", error.message);
     return NextResponse.json(
       { message: "Something went wrong", error: error.message },

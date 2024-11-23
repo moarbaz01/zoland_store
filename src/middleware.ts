@@ -2,34 +2,48 @@ import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function middleware(req: NextRequest) {
-  // Define the login page URL
   const loginPageUrl = "/login";
+  const notFoundPageUrl = "/notfound";
+  const url = req.nextUrl.clone();
+  const pathname = url.pathname;
 
-  // Check if the user is authenticated
+  // Fetch the authentication token
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET! });
-  // If the user is not authenticated and trying to access a protected route
+
   if (!token) {
-    const url = req.nextUrl.clone();
+
+    if (pathname === loginPageUrl) {
+      return NextResponse.next();
+    }
+
     url.pathname = loginPageUrl;
     return NextResponse.redirect(url);
   }
 
-  // check role
   const role = token.role;
-  if (role !== "admin") {
-    const url = req.nextUrl.clone();
-    if (url.pathname.startsWith("/dashboard")) {
-      // send to notfound page
-      url.pathname = "/notfound";
+
+  if (role === "user") {
+    if (pathname.startsWith("/dashboard")) {
+      url.pathname = notFoundPageUrl;
       return NextResponse.redirect(url);
+    }
+
+    if (pathname.startsWith("/user-dashboard")) {
+      return NextResponse.next();
+    }
+  } else if (role === "admin") {
+    if (pathname.startsWith("/dashboard")) {
+      return NextResponse.next();
     }
   }
 
-  // Allow the request to proceed
   return NextResponse.next();
+
 }
 
-// Specify the paths for middleware to run on
 export const config = {
-  matcher: ["/user-dashboard", "/dashboard","/api/payment","/api/order","/api/user",], // Apply middleware to all routes under /protected
+  matcher: [
+    "/dashboard/:path*",
+    "/user-dashboard/:path*",
+  ],
 };

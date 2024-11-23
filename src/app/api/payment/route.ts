@@ -20,7 +20,9 @@ export async function GET(req: Request) {
     } else {
       // Fetch all orders
       orders = await Payment.find();
+
     }
+
 
     return NextResponse.json(orders, { status: 200 });
   } catch (error) {
