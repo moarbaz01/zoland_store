@@ -1,47 +1,35 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import axios from "axios";
-import Loader from "@/components/Loader";
 import CustomerEditForm from "@/components/Dashboard/Customers/CustomerEditForm";
 
-const Page = ({ params }: { params: { customerId: string } }) => {
-  const { customerId } = params;
-  const [customer, setCustomer] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+type Params = Promise<{ customerId: string }>
+const Page = async ({ params }: { params: Params }) => {
+  const  customerId = (await params).customerId;
 
-  useEffect(() => {
-    const fetchCustomer = async () => {
-      try {
-        const res = await axios.get(`/api/user?id=${customerId}`);
-        if (res.status === 200) {
-          setCustomer(res.data);
-        }
-      } catch (err) {
-        setError(err.message || "An error occurred");
-      } finally {
-        setLoading(false);
+  try {
+    // Fetch the customer data from your API
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/user?id=${customerId}`,
+      {
+        cache: "no-store", // Avoid caching for dynamic content
       }
-    };
+    );
 
-    fetchCustomer();
-  }, [customerId]);
+    if (!res.ok) {
+      throw new Error(`Failed to fetch customer: ${res.statusText}`);
+    }
 
-  if (loading) {
-    return <Loader />;
-  }
+    const customer = await res.json();
 
-  if (error) {
+    return <CustomerEditForm customer={customer} />;
+  } catch (error) {
+    console.error("Error fetching customer:", error);
+
     return (
       <div>
         <h1>Error</h1>
-        <p>{error}</p>
+        <p>Failed to load customer data. Please try again later.</p>
       </div>
     );
   }
-
-  return <CustomerEditForm customer={customer} />;
 };
 
 export default Page;

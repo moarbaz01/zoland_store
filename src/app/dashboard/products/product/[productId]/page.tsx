@@ -1,35 +1,24 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import ProductForm from "@/components/Dashboard/ProductForm";
-import Loader from "@/components/Loader";
-import axios from "axios";
 
-const Page = ({ params }: { params: { productId: string } }) => {
-  const { productId } = params;
-  const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+export default async function Page({ params }: { params: Promise<{ productId: string }> }){
+  const productId = (await params).productId;
 
-  useEffect(() => {
-    const fetchProduct = async () => {
-      try {
-        const response = await axios.get(`/api/product?id=${productId}`);
-        if (response.data) {
-          setProduct(response.data);
-        }
-      } catch (err) {
-        setError(err.message || "An error occurred");
-      } finally {
-        setLoading(false);
-      }
-    };
+  let product = null;
+  let error = null;
 
-    fetchProduct();
-  }, [productId]);
+  try {
+    const res = await fetch(`/api/product?id=${productId}`, {
+      cache: "no-store",
+    });
 
-  if (loading) {
-    return <Loader />;
+    if (!res.ok) {
+      throw new Error(`Failed to fetch product data: ${res.statusText}`);
+    }
+
+    product = await res.json();
+  } catch (err) {
+    console.log(err);
+    error = "Failed to load product data. Please try again later.";
   }
 
   if (error) {
@@ -44,4 +33,3 @@ const Page = ({ params }: { params: { productId: string } }) => {
   return <ProductForm product={product} />;
 };
 
-export default Page;

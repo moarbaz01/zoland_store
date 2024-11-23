@@ -94,6 +94,8 @@ export async function POST(req: Request) {
     // Verify Status
     const data = await statusRequest(merchantId!, merchantTransactionId!);
     console.log("DATA", data);
+    console.log("Request URL:", req.url);
+    const reqUrl = new URL(`${process.env.NEXT_PUBLIC_BASE_URL}/success`);
 
     // If checksum is valid, process the payment response
     if (!data.success) {
@@ -144,7 +146,7 @@ export async function POST(req: Request) {
     });
 
     // Redirect to success page
-    return NextResponse.redirect(`${process.env.NEXT_PUBLIC_BASE_URL}/success`);
+    return NextResponse.redirect(reqUrl);
   } catch (error: any) {
     console.log(error);
     console.error("Error in payment callback:", error.message);

@@ -7,9 +7,6 @@ interface Game {
   image: StaticImageData | string;
 }
 
-interface TopBannerProps {
-  id: string;
-}
 
 const TopBanner = ({image,name} : Game) => {
 

@@ -1,47 +1,35 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import Loader from "@/components/Loader";
-import axios from "axios";
 import OrderView from "@/components/Dashboard/Orders/OrderView";
 
-const Page = ({ params }: { params: { orderId: string } }) => {
-  const { orderId } = params;
-  const [order, setOrder] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+type Params = Promise<{ orderId: string }>
+const Page = async ({ params }: { params: Params }) => {
+  const orderId = (await params).orderId;
 
-  useEffect(() => {
-    const fetchOrder = async () => {
-      try {
-        const response = await axios.get(`/api/order?id=${orderId}`);
-        if (response.data) {
-          setOrder(response.data);
-        }
-      } catch (err) {
-        setError(err.message || "An error occurred");
-      } finally {
-        setLoading(false);
+  try {
+    // Fetch order data from your API
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/order?id=${orderId}`,
+      {
+        cache: "no-store", // Ensure fresh data is fetched every time
       }
-    };
+    );
 
-    fetchOrder();
-  }, [orderId]);
+    if (!res.ok) {
+      throw new Error(`Failed to fetch order: ${res.statusText}`);
+    }
 
-  if (loading) {
-    return <Loader />;
-  }
+    const order = await res.json();
 
-  if (error) {
+    return <OrderView order={order} />;
+  } catch (error) {
+    console.error("Error fetching order:", error);
+
     return (
       <div>
         <h1>Error</h1>
-        <p>{error}</p>
+        <p>Failed to load order data. Please try again later.</p>
       </div>
     );
   }
-
-  return <OrderView order={order} />;
 };
 
 export default Page;

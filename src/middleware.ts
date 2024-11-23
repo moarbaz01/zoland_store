@@ -31,5 +31,5 @@ export async function middleware(req: NextRequest) {
 
 // Specify the paths for middleware to run on
 export const config = {
-  matcher: ["/user-dashboard", "/dashboard", "/dashboard/:path"], // Apply middleware to all routes under /protected
+  matcher: ["/user-dashboard", "/dashboard","/api/payment","/api/order","/api/user",], // Apply middleware to all routes under /protected
 };

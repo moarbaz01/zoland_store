@@ -6,9 +6,9 @@ import {
   Typography,
   Select,
   MenuItem,
-  Button,
   Divider,
   SelectChangeEvent,
+  Button,
 } from "@mui/material";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -45,6 +45,7 @@ const OrderView = ({ order }: { order: Order }) => {
       setStatus(order.status === "pending" ? "success" : "pending");
       toast.success("Status updated successfully");
     } catch (error) {
+      console.log("Error updating status:", error);
       toast.error("Error updating status");
     }
   };
@@ -60,450 +61,122 @@ const OrderView = ({ order }: { order: Order }) => {
       >
         Order Details
       </Typography>
-      <div className="flex flex-col md:flex-row gap-4">
-        {/* Order Details Section */}
-        <Box
+
+      <Box
+        sx={{
+          flex: 1,
+          backgroundColor: "#2D3748",
+          padding: "16px",
+          borderRadius: "8px",
+          maxWidth: "600px",
+        }}
+      >
+        <Typography
+          variant="h6"
           sx={{
-            flex: "1",
-            backgroundColor: "#2D3748",
-            padding: "16px",
-            borderRadius: "8px",
-            maxWidth: "600px",
+            fontWeight: "bold",
+            marginBottom: "16px",
           }}
         >
-          <Typography
-            variant="h6"
-            sx={{
-              fontWeight: "bold",
-              marginBottom: "16px",
-            }}
-          >
-            Order Information
-          </Typography>
-          <Divider sx={{ backgroundColor: "#4A5568", marginBottom: "16px" }} />
+          Order Information
+        </Typography>
+        <Divider sx={{ backgroundColor: "#4A5568", marginBottom: "16px" }} />
 
-          <div className="flex flex-col gap-6">
-            <Box
-              sx={{
-                display: "table",
-                width: "100%",
-                backgroundColor: "#F7FAFC", // Light background for the table
-                padding: "20px",
-                borderRadius: "10px",
-                boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)", // Subtle shadow for depth
-              }}
-            >
-              {/* Table Header */}
-              <Box
-                sx={{
-                  display: "table-row",
-                  fontWeight: "bold",
-                  marginBottom: "10px",
-                }}
-              >
-                <Box
-                  sx={{
-                    display: "table-cell",
-                    padding: "12px",
-                    borderBottom: "2px solid #CBD5E0",
-                  }}
-                >
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      fontSize: "18px",
-                      color: "#2D3748",
-                      fontWeight: "bold",
-                      textWrap: "nowrap",
-                    }}
-                  >
-                    Order ID
-                  </Typography>
-                </Box>
-                <Box
-                  sx={{
-                    display: "table-cell",
-                    padding: "12px",
-                    borderBottom: "2px solid #CBD5E0",
-                  }}
-                >
-                  <Typography
-                    variant="body1"
-                    sx={{ fontSize: "18px", color: "#4A5568" }}
-                  >
-                    {order._id}
-                  </Typography>
-                </Box>
-              </Box>
-
-              {/* Order Details */}
-              <Box sx={{ display: "table-row", marginBottom: "10px" }}>
-                <Box
-                  sx={{
-                    display: "table-cell",
-                    padding: "12px",
-                    borderBottom: "1px solid #CBD5E0",
-                    fontWeight: "bold",
-                  }}
-                >
-                  <Typography
-                    variant="body1"
-                    sx={{ fontSize: "16px", color: "#4A5568" }}
-                  >
-                    Email
-                  </Typography>
-                </Box>
-                <Box
-                  sx={{
-                    display: "table-cell",
-                    padding: "12px",
-                    borderBottom: "1px solid #CBD5E0",
-                  }}
-                >
-                  <Typography
-                    variant="body1"
-                    sx={{ fontSize: "16px", color: "#4A5568" }}
-                  >
-                    {order.email}
-                  </Typography>
-                </Box>
-              </Box>
-
-              <Box sx={{ display: "table-row", marginBottom: "10px" }}>
-                <Box
-                  sx={{
-                    display: "table-cell",
-                    padding: "12px",
-                    borderBottom: "1px solid #CBD5E0",
-                    fontWeight: "bold",
-                  }}
-                >
-                  <Typography
-                    variant="body1"
-                    sx={{ fontSize: "16px", color: "#4A5568" }}
-                  >
-                    Product
-                  </Typography>
-                </Box>
-                <Box
-                  sx={{
-                    display: "table-cell",
-                    padding: "12px",
-                    borderBottom: "1px solid #CBD5E0",
-                  }}
-                >
-                  <Typography
-                    variant="body1"
-                    sx={{ fontSize: "16px", color: "#4A5568" }}
-                  >
-                    {order.product.name ?? "Normal Pack"}
-                  </Typography>
-                </Box>
-              </Box>
-              <Box sx={{ display: "table-row", marginBottom: "10px" }}>
-                <Box
-                  sx={{
-                    display: "table-cell",
-                    padding: "12px",
-                    borderBottom: "1px solid #CBD5E0",
-                    fontWeight: "bold",
-                  }}
-                >
-                  <Typography
-                    variant="body1"
-                    sx={{ fontSize: "16px", color: "#4A5568" }}
-                  >
-                    Status
-                  </Typography>
-                </Box>
-                <Box
-                  sx={{
-                    display: "table-cell",
-                    padding: "12px",
-                    borderBottom: "1px solid #CBD5E0",
-                  }}
-                >
-                  <Typography
-                    variant="body1"
-                    sx={{ fontSize: "16px", color: "#4A5568" }}
-                  >
-                    {status}
-                  </Typography>
-                </Box>
-              </Box>
-
-              <Box sx={{ display: "table-row", marginBottom: "10px" }}>
-                <Box
-                  sx={{
-                    display: "table-cell",
-                    padding: "12px",
-                    borderBottom: "1px solid #CBD5E0",
-                    fontWeight: "bold",
-                  }}
-                >
-                  <Typography
-                    variant="body1"
-                    sx={{ fontSize: "16px", color: "#4A5568" }}
-                  >
-                    Order Type
-                  </Typography>
-                </Box>
-                <Box
-                  sx={{
-                    display: "table-cell",
-                    padding: "12px",
-                    borderBottom: "1px solid #CBD5E0",
-                  }}
-                >
-                  <Typography
-                    variant="body1"
-                    sx={{ fontSize: "16px", color: "#4A5568" }}
-                  >
-                    {order.orderType}
-                  </Typography>
-                </Box>
-              </Box>
-
-              <Box sx={{ display: "table-row", marginBottom: "10px" }}>
-                <Box
-                  sx={{
-                    display: "table-cell",
-                    padding: "12px",
-                    borderBottom: "1px solid #CBD5E0",
-                    fontWeight: "bold",
-                  }}
-                >
-                  <Typography
-                    variant="body1"
-                    sx={{ fontSize: "16px", color: "#4A5568" }}
-                  >
-                    Zone ID
-                  </Typography>
-                </Box>
-                <Box
-                  sx={{
-                    display: "table-cell",
-                    padding: "12px",
-                    borderBottom: "1px solid #CBD5E0",
-                  }}
-                >
-                  <Typography
-                    variant="body1"
-                    sx={{ fontSize: "16px", color: "#4A5568" }}
-                  >
-                    {order.gameCredentials.zoneId}
-                  </Typography>
-                </Box>
-              </Box>
-
-              <Box sx={{ display: "table-row", marginBottom: "10px" }}>
-                <Box
-                  sx={{
-                    display: "table-cell",
-                    padding: "12px",
-                    borderBottom: "1px solid #CBD5E0",
-                    fontWeight: "bold",
-                  }}
-                >
-                  <Typography
-                    variant="body1"
-                    sx={{ fontSize: "16px", color: "#4A5568" }}
-                  >
-                    User ID
-                  </Typography>
-                </Box>
-                <Box
-                  sx={{
-                    display: "table-cell",
-                    padding: "12px",
-                    borderBottom: "1px solid #CBD5E0",
-                  }}
-                >
-                  <Typography
-                    variant="body1"
-                    sx={{ fontSize: "16px", color: "#4A5568" }}
-                  >
-                    {order.gameCredentials.userId}
-                  </Typography>
-                </Box>
-              </Box>
-
-              <Box sx={{ display: "table-row", marginBottom: "10px" }}>
-                <Box
-                  sx={{
-                    display: "table-cell",
-                    padding: "12px",
-                    borderBottom: "1px solid #CBD5E0",
-                    fontWeight: "bold",
-                  }}
-                >
-                  <Typography
-                    variant="body1"
-                    sx={{ fontSize: "16px", color: "#4A5568" }}
-                  >
-                    Game
-                  </Typography>
-                </Box>
-                <Box
-                  sx={{
-                    display: "table-cell",
-                    padding: "12px",
-                    borderBottom: "1px solid #CBD5E0",
-                  }}
-                >
-                  <Typography
-                    variant="body1"
-                    sx={{ fontSize: "16px", color: "#4A5568" }}
-                  >
-                    {order.gameCredentials.game}
-                  </Typography>
-                </Box>
-              </Box>
-
-              <Box sx={{ display: "table-row", marginBottom: "10px" }}>
-                <Box
-                  sx={{
-                    display: "table-cell",
-                    padding: "12px",
-                    borderBottom: "1px solid #CBD5E0",
-                    fontWeight: "bold",
-                  }}
-                >
-                  <Typography
-                    variant="body1"
-                    sx={{ fontSize: "16px", color: "#4A5568" }}
-                  >
-                    Price
-                  </Typography>
-                </Box>
-                <Box
-                  sx={{
-                    display: "table-cell",
-                    padding: "12px",
-                    borderBottom: "1px solid #CBD5E0",
-                  }}
-                >
-                  <Typography
-                    variant="body1"
-                    sx={{ fontSize: "16px", color: "#4A5568" }}
-                  >
-                    {order.amount}
-                  </Typography>
-                </Box>
-              </Box>
-
-              <Box sx={{ display: "table-row", marginBottom: "10px" }}>
-                <Box
-                  sx={{
-                    display: "table-cell",
-                    padding: "12px",
-                    borderBottom: "1px solid #CBD5E0",
-                    fontWeight: "bold",
-                  }}
-                >
-                  <Typography
-                    variant="body1"
-                    sx={{ fontSize: "16px", color: "#4A5568" }}
-                  >
-                    Amount
-                  </Typography>
-                </Box>
-                <Box
-                  sx={{
-                    display: "table-cell",
-                    padding: "12px",
-                    borderBottom: "1px solid #CBD5E0",
-                  }}
-                >
-                  <Typography
-                    variant="body1"
-                    sx={{ fontSize: "16px", color: "#4A5568" }}
-                  >
-                    {order.orderDetails}
-                  </Typography>
-                </Box>
-              </Box>
-
-              <Box sx={{ display: "table-row" }}>
-                <Box
-                  sx={{
-                    display: "table-cell",
-                    padding: "12px",
-                    fontWeight: "bold",
-                  }}
-                >
-                  <Typography
-                    variant="body1"
-                    sx={{ fontSize: "16px", color: "#4A5568" }}
-                  >
-                    Date
-                  </Typography>
-                </Box>
-                <Box sx={{ display: "table-cell", padding: "12px" }}>
-                  <Typography
-                    variant="body1"
-                    sx={{ fontSize: "16px", color: "#4A5568" }}
-                  >
-                    {new Date(order.createdAt).toLocaleDateString()}
-                  </Typography>
-                </Box>
-              </Box>
-            </Box>
-          </div>
-        </Box>
-
-        {/* Status Update Section */}
+        {/* Simplified Order Details */}
         <Box
           sx={{
-            flex: "1",
-            backgroundColor: "#2D3748",
+            backgroundColor: "#F7FAFC",
             padding: "16px",
-            borderRadius: "8px",
-            maxWidth: "300px",
-            height: "fit-content",
+            borderRadius: "10px",
+            boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
           }}
         >
-          <Typography
-            variant="h6"
-            sx={{
-              fontWeight: "bold",
-              marginBottom: "16px",
-            }}
-          >
-            Update Order Status
-          </Typography>
-          <Divider sx={{ backgroundColor: "#4A5568", marginBottom: "16px" }} />
+          <Box sx={{ marginBottom: "10px" }}>
+            <Typography variant="body1" sx={{ fontWeight: "bold" }}>
+              Order ID:
+            </Typography>
+            <Typography variant="body1">{order._id}</Typography>
+          </Box>
 
-          <Select
-            value={status}
-            onChange={handleStatusChange}
-            fullWidth
-            sx={{
-              backgroundColor: "#1A202C",
-              marginBottom: "16px",
-            }}
-          >
-            <MenuItem value="pending">Pending</MenuItem>
-            <MenuItem value="success">Success</MenuItem>
-          </Select>
+          <Box sx={{ marginBottom: "10px" }}>
+            <Typography variant="body1" sx={{ fontWeight: "bold" }}>
+              Email:
+            </Typography>
+            <Typography variant="body1">{order.email}</Typography>
+          </Box>
 
-          <Button
-            onClick={handleStatusUpdate}
-            variant="contained"
-            disabled={status === order.status}
-            sx={{
-              backgroundColor: "#3182CE",
-              color: "#FFF",
-              "&:hover": {
-                backgroundColor: "#2B6CB0",
-              },
-              width: "100%",
-            }}
-          >
-            Update
-          </Button>
+          <Box sx={{ marginBottom: "10px" }}>
+            <Typography variant="body1" sx={{ fontWeight: "bold" }}>
+              Product:
+            </Typography>
+            <Typography variant="body1">
+              {order.product.name ?? "Normal Pack"}
+            </Typography>
+          </Box>
+
+          <Box sx={{ marginBottom: "10px" }}>
+            <Typography variant="body1" sx={{ fontWeight: "bold" }}>
+              Status:
+            </Typography>
+            <Typography variant="body1">{status}</Typography>
+          </Box>
+
+          <Box sx={{ marginBottom: "10px" }}>
+            <Typography variant="body1" sx={{ fontWeight: "bold" }}>
+              Price:
+            </Typography>
+            <Typography variant="body1">{order.amount}</Typography>
+          </Box>
+
+          <Box sx={{ marginBottom: "10px" }}>
+            <Typography variant="body1" sx={{ fontWeight: "bold" }}>
+              Date:
+            </Typography>
+            <Typography variant="body1">
+              {new Date(order.createdAt).toLocaleDateString()}
+            </Typography>
+          </Box>
         </Box>
-      </div>
+      </Box>
+
+      {/* Status Update Section */}
+      <Box
+        sx={{
+          backgroundColor: "#2D3748",
+          padding: "16px",
+          borderRadius: "8px",
+          maxWidth: "200px",
+          marginTop: "20px",
+        }}
+      >
+        <Typography
+          variant="h6"
+          sx={{ fontWeight: "bold", marginBottom: "16px" }}
+        >
+          Update Status
+        </Typography>
+        <Select
+          value={status}
+          onChange={handleStatusChange}
+          sx={{ backgroundColor: "#E2E8F0", color: "#2D3748" }}
+        >
+          <MenuItem value="pending">Pending</MenuItem>
+          <MenuItem value="success">Success</MenuItem>
+        </Select>
+        <Button
+          onClick={handleStatusUpdate}
+          sx={{
+            marginTop: "16px",
+            backgroundColor: "#4A5568",
+            color: "white",
+            "&:hover": {
+              backgroundColor: "#2D3748",
+            },
+          }}
+        >
+          Update Status
+        </Button>
+      </Box>
     </div>
   );
 };

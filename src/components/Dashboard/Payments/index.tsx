@@ -10,7 +10,6 @@ import {
   TableRow,
   TableSortLabel,
   TablePagination,
-  Paper,
   Select,
   MenuItem,
   InputLabel,
@@ -19,7 +18,6 @@ import {
   SelectChangeEvent,
   Chip,
 } from "@mui/material";
-import { useRouter } from "next/navigation";
 
 interface Payment {
   _id: string;
@@ -37,7 +35,7 @@ interface PaymentsProps {
 }
 
 const Payments: React.FC<PaymentsProps> = ({ allPayments }) => {
-  const [payments, setPayments] = useState(allPayments);
+  const [payments] = useState(allPayments);
   const [orderDirection, setOrderDirection] = useState<"asc" | "desc">("asc");
   const [orderBy, setOrderBy] = useState<string>("createdAt");
   const [page, setPage] = useState(0);
@@ -46,7 +44,6 @@ const Payments: React.FC<PaymentsProps> = ({ allPayments }) => {
   const [monthFilter, setMonthFilter] = useState<number | string>("");
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [dateFilter, setDateFilter] = useState<string>("");
-  const router = useRouter();
 
   // Sorting logic
   const handleRequestSort = (property: string) => {

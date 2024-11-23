@@ -7,11 +7,10 @@ import {
   FaBox,
   FaShoppingCart,
   FaUsers,
-  FaCogs,
   FaWallet,
 } from "react-icons/fa";
 import { HiMenuAlt1 } from "react-icons/hi"; // Hamburger icon
-import { Logout, Wallet } from "@mui/icons-material";
+import { Logout } from "@mui/icons-material";
 import { signOut } from "next-auth/react";
 import toast from "react-hot-toast";
 const Sidebar = () => {
@@ -76,6 +75,7 @@ const Sidebar = () => {
             {links.map(({ href, label, icon: Icon }) => (
               <li key={href} className="mt-2">
                 <Link
+                  prefetch
                   href={href}
                   className={`flex items-center p-4 rounded-lg transition-colors ${
                     pathname === href

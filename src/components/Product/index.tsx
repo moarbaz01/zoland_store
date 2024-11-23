@@ -11,7 +11,6 @@ const Product = ({
   _id,
   description,
   image,
-  region,
   isDeleted,
   isApi,
   stock,
@@ -26,7 +25,6 @@ const Product = ({
   category: string;
   isApi: boolean;
   stock: true;
-  region: string;
   game: string;
   cost: { id: string; amount: string; price: string }[];
 }) => {
@@ -67,7 +65,7 @@ const Product = ({
     } finally {
       setLoading(false);
     }
-  }, [userId, zoneId, cost, region]);
+  }, [userId, zoneId,]);
 
   // Check Role
   const handleSubmitCheckRole = async (
@@ -107,7 +105,7 @@ const Product = ({
         console.log(error);
       }
     },
-    [session?.user, cost]
+    [session?.user, cost,amountSelected,router]
   );
 
   // Create Order
@@ -163,6 +161,7 @@ const Product = ({
     stock,
     game,
     handlePay,
+    isApi
   ]);
 
   // Calculate Total

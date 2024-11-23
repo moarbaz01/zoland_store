@@ -4,14 +4,12 @@ import React, { useCallback, useEffect, useState } from "react";
 import { TextField, Button, Paper } from "@mui/material";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { useSession } from "next-auth/react";
 import { useDispatch, useSelector } from "react-redux";
 import { updateName } from "@/redux/userSlice";
 
 const UserEditForm = () => {
   const [name, setName] = useState("");
   const [id, setId] = useState("");
-  const { data: session, update } = useSession();
   const { user } = useSelector((state: any) => state.user);
   const dispatch = useDispatch();
 
@@ -47,7 +45,7 @@ const UserEditForm = () => {
       console.error("Error updating user:", error);
       toast.error("An error occurred while updating the user.");
     }
-  }, [name, id, update]);
+  }, [name, id, dispatch]);
 
   //   Handle Change
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

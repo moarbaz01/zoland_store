@@ -1,32 +1,45 @@
 import Product from "@/components/Product";
 
-const Page = async ({ params }: { params: { productId: string } }) => {
+// Page component
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ productId: string }>;
+}) {
   const { productId } = await params;
 
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/product?id=${productId}`
-  );
+  try {
+    // Fetch the product data at build time
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/product?id=${productId}`
+    );
 
-  if (!response.ok) {
-    // Handle the error, such as a 404 or other HTTP status codes
-    console.error(`Failed to fetch product: ${response.statusText}`);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch product: ${response.statusText}`);
+    }
+
+    const product = await response.json();
+
+    if (!product) {
+      return (
+        <div>
+          <h1>Product Not Found</h1>
+          <p>
+            We couldn&apos;t find the product you&apos;re looking for. Please
+            check the ID.
+          </p>
+        </div>
+      );
+    }
+
+    return <Product {...product} />;
+  } catch (err: any) {
+    // Handle errors
     return (
       <div>
-        <h1>Product Not Found</h1>
-        <p>
-          We couldn't find the product you're looking for. Please check the ID.
-        </p>
+        <h1>Error</h1>
+        <p>{err.message || "An error occurred while fetching the product."}</p>
       </div>
     );
   }
-
-  const product = await response.json();
-
-  return (
-    <>
-      <Product {...product} />
-    </>
-  );
-};
-
-export default Page;
+}

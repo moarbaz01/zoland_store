@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { Product } from "@/models/product.model";
 
-export async function GET(req: Request) {
+export async function GET() {
   try {
     const products = await Product.find({ isDeleted: false });
     if (!products) {

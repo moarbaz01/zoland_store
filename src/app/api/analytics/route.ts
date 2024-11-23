@@ -3,7 +3,7 @@ import { Product } from "@/models/product.model";
 import { User } from "@/models/user.model";
 import { NextResponse } from "next/server";
 
-export async function GET(req: Request) {
+export async function GET() {
   try {
     const orders = await Order.countDocuments();
     const products = await Product.countDocuments();

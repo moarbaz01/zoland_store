@@ -11,13 +11,11 @@ import {
   TableRow,
   TableSortLabel,
   TablePagination,
-  Paper,
   CircularProgress,
   Chip,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { LuLogOut, LuShoppingBag, LuUser } from "react-icons/lu";
-import axios from "axios";
 import { format } from "date-fns"; // For formatting date
 import UserEditForm from "./UserEditForm";
 import { useSelector } from "react-redux";

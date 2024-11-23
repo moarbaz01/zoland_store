@@ -10,7 +10,6 @@ import {
   TableRow,
   TableSortLabel,
   TablePagination,
-  Paper,
   Select,
   MenuItem,
   InputLabel,
@@ -39,7 +38,7 @@ interface OrdersProps {
 }
 
 const Orders: React.FC<OrdersProps> = ({ allOrders }) => {
-  const [orders, setOrders] = useState(allOrders);
+  const [orders] = useState(allOrders);
   const [orderDirection, setOrderDirection] = useState<"asc" | "desc">("asc");
   const [orderBy, setOrderBy] = useState<string>("createdAt");
   const [page, setPage] = useState(0);

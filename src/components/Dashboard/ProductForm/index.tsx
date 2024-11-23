@@ -14,6 +14,7 @@ import {
 import { Add, Delete } from "@mui/icons-material";
 import axios from "axios";
 import toast from "react-hot-toast";
+import Image from "next/image";
 
 interface CostItem {
   id: string;
@@ -298,7 +299,12 @@ const ProductForm = ({ product }: { product?: Product }) => {
               className="mb-2"
             />
             {imagePreview && (
-              <img src={imagePreview} alt="Image Preview" width="100" />
+              <Image
+                src={imagePreview}
+                height="100"
+                alt="Image Preview"
+                width="100"
+              />
             )}
             {formData.image && typeof formData.image !== "string" && (
               <Button

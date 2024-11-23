@@ -20,7 +20,7 @@ const StoreUser = () => {
         }
       });
     }
-  }, [session?.user]);
+  }, [session?.user, dispatch]);
   return null;
 };
 const Provider = ({ children }: { children: React.ReactNode }) => {

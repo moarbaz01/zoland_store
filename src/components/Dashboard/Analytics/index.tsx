@@ -10,23 +10,26 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-import {
-  FaShoppingCart,
-  FaBox,
-  FaUsers,
-  FaDollarSign,
-  FaRupeeSign,
-} from "react-icons/fa";
+import { FaShoppingCart, FaBox, FaUsers, FaRupeeSign } from "react-icons/fa";
 import toast from "react-hot-toast";
+import { CircularProgress } from "@mui/material";
 
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
+interface AnalyticsData {
+  orders: number | null;
+  products: number | null;
+  customers: number | null;
+  revenue: number | null;
+  monthlySales: { month: number; totalSales: number }[] | [];
+}
+
 const Analytics = () => {
-  const [analyticsData, setAnalyticsData] = useState({
-    orders: 0,
-    products: 0,
-    customers: 0,
-    revenue: 0,
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData>({
+    orders: null,
+    products: null,
+    customers: null,
+    revenue: null,
     monthlySales: [],
   });
 
@@ -65,7 +68,9 @@ const Analytics = () => {
     datasets: [
       {
         label: "Sales (₹)",
-        data: analyticsData.monthlySales.map((item) => item.totalSales || 0),
+        data: analyticsData.monthlySales.map(
+          (item: any) => item.totalSales || 0
+        ),
         backgroundColor: "#34D399",
       },
     ],
@@ -86,7 +91,11 @@ const Analytics = () => {
           <div>
             <h2 className="text-gray-400">Orders</h2>
             <p className="text-3xl font-semibold text-gray-100">
-              {analyticsData.orders}
+              {analyticsData.orders ? (
+                analyticsData.orders
+              ) : (
+                <CircularProgress />
+              )}
             </p>
           </div>
         </div>
@@ -97,7 +106,11 @@ const Analytics = () => {
           <div>
             <h2 className="text-gray-400">Products</h2>
             <p className="text-3xl font-semibold text-gray-100">
-              {analyticsData.products}
+              {analyticsData.products ? (
+                analyticsData.products
+              ) : (
+                <CircularProgress />
+              )}
             </p>
           </div>
         </div>
@@ -108,7 +121,11 @@ const Analytics = () => {
           <div>
             <h2 className="text-gray-400">Customers</h2>
             <p className="text-3xl font-semibold text-gray-100">
-              {analyticsData.customers}
+              {analyticsData.customers ? (
+                analyticsData.customers
+              ) : (
+                <CircularProgress />
+              )}
             </p>
           </div>
         </div>
@@ -119,7 +136,12 @@ const Analytics = () => {
           <div>
             <h2 className="text-gray-400">Total Sales</h2>
             <p className="text-3xl font-semibold text-gray-100">
-              ₹{analyticsData.revenue}
+              ₹
+              {analyticsData.revenue ? (
+                analyticsData.revenue.toFixed(2)
+              ) : (
+                <CircularProgress />
+              )}
             </p>
           </div>
         </div>

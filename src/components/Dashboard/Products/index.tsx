@@ -8,7 +8,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Paper,
   TextField,
   IconButton,
 } from "@mui/material";
@@ -51,6 +50,7 @@ const Products = ({ allProducts }) => {
         toast.error("Failed to delete product");
       }
     } catch (error) {
+      console.log(error)
       toast.error("Failed to delete product");
     }
   };

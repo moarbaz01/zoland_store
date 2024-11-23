@@ -79,7 +79,7 @@ export const authOptions: AuthOptions = {
       return session;
     },
 
-    redirect({ url, baseUrl }) {
+    redirect({ baseUrl }) {
       return baseUrl;
     },
   },

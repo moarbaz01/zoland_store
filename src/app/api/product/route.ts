@@ -1,6 +1,6 @@
 import { dbConnect } from "@/lib/database";
 import { Product } from "@/models/product.model";
-import { cloudinary, cloudinaryUpload } from "@/utils/cloudinary";
+import { cloudinaryUpload } from "@/utils/cloudinary";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 

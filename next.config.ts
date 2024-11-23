@@ -1,6 +1,5 @@
 import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
+const nextConfig : NextConfig = {
   images: {
     domains: ["lh3.googleusercontent.com", "res.cloudinary.com"],
   },
@@ -12,7 +11,7 @@ const nextConfig: NextConfig = {
   },
   output: "standalone", // Optimized for serverless deployment
   // reactStrictMode: true, // Catches potential errors during development
-  swcMinify: true, // Faster builds and minified JavaScript
+  // swcMinify: true, // Faster builds and minified JavaScript
 };
 
 export default nextConfig;
