@@ -26,7 +26,7 @@ const Navbar = () => {
           </Link>
         ) : (
           <div className="flex items-center gap-4">
-            {session?.user?.role && (
+            {session?.user?.role === "admin" && (
               <Link href="/dashboard" className="">
                 <button className="bg-white rounded-full px-6 py-1 hover:opacity-80 transition text-black">
                   Dashboard
