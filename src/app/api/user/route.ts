@@ -149,12 +149,7 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
-    const deletedUser = await User.findByIdAndUpdate(userId, {
-      isDeleted: true,
-    });
-    if (!deletedUser) {
-      return NextResponse.json({ message: "User not found" }, { status: 404 });
-    }
+    await User.findByIdAndDelete(userId);
 
     return NextResponse.json(
       { message: "User deleted successfully" },
