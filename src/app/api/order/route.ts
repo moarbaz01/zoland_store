@@ -1,6 +1,5 @@
 import { dbConnect } from "@/lib/database";
 import { Order } from "@/models/order.model";
-import { Product } from "@/models/product.model";
 import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";

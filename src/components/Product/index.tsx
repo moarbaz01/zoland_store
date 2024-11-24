@@ -142,6 +142,7 @@ const Product = ({
     stock,
     game,
     isApi,
+    router,
   ]);
 
   // Calculate Total
