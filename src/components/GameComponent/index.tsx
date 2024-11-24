@@ -18,13 +18,13 @@ const GameComponent = ({
           alt={name}
           height={150}
           width={150}
-          className="rounded-xl w-full h-auto object-cover"
+          className="rounded-xl w-full h-auto aspect-square object-cover"
         />
         <h3 className="text-white mt-2 text-sm sm:text-base font-bold">
           {name}
         </h3>
         <button className="bg-white mt-2 w-full text-black py-2 px-4 text-sm sm:text-base rounded-full hover:bg-gray-200 transition-colors">
-          Buy
+          Top Up
         </button>
       </div>
     </Link>

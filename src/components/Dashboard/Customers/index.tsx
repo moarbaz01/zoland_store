@@ -109,7 +109,7 @@ const Customers = ({ allCustomers }) => {
   );
 
   return (
-    <div className="md:ml-72 p-6">
+    <div className="md:ml-72 md:py-6 md:px-6 px-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-white mb-6">Customers</h1>
         <p className="text-2xl font-bold text-white mb-6">

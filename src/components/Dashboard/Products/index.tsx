@@ -63,7 +63,7 @@ const Products = ({ allProducts }) => {
   );
 
   return (
-    <div className="md:pl-72 p-6 min-h-screen bg-gray-900">
+    <div className="md:pl-72 md:py-6 md:px-6 px-4 min-h-screen bg-gray-900">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-white mb-6">Products</h1>
         <p className="text-2xl font-bold text-white mb-6">

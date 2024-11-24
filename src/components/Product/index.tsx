@@ -121,9 +121,11 @@ const Product = ({
       toast.error("Please fill UserId");
       return;
     }
-    if (!zoneId) {
-      toast.error("Please fill ZoneId");
-      return;
+    if (isApi) {
+      if (!zoneId) {
+        toast.error("Please fill ZoneId");
+        return;
+      }
     }
 
     if (!stock) {
@@ -131,6 +133,7 @@ const Product = ({
       return;
     }
     try {
+      setLoading(true);
       const res = await axios.post("/api/order", {
         user: session?.user.id,
         email: session?.user.email,
@@ -146,16 +149,14 @@ const Product = ({
         amount: cost[amountSelected].price,
       });
       const data = res.data;
-      if (
-        (res.status === 201 || res.status === 200) &&
-        data.orderType === "API Order"
-      ) {
-        toast.success("Order Created");
+      if (res.status === 201 || res.status === 200) {
         await handlePay(data._id);
       }
     } catch (error) {
       console.log(error);
       toast.error("Error Creating Order");
+    } finally {
+      setLoading(false);
     }
   }, [
     userId,
@@ -199,7 +200,7 @@ const Product = ({
                     amountSelected === i
                       ? "bg-white text-black"
                       : "bg-secondary"
-                  } cursor-pointer transition px-4 py-4 h-16 flex items-center`}
+                  } cursor-pointer transition px-4 py-4 min-h-16 flex items-center`}
                 >
                   {item.amount}
                 </div>
@@ -227,7 +228,7 @@ const Product = ({
               />
               <input
                 type="text"
-                placeholder="( Zone ID )"
+                placeholder={`Zone ID ${isApi ? "" : "( Optional )"} `}
                 onChange={(e) => setZoneId(e.target.value)}
                 value={zoneId}
                 autoComplete="on"
@@ -239,14 +240,16 @@ const Product = ({
               {errorMessage && (
                 <p className="text-red-500 my-1">{errorMessage}</p>
               )}
-              <button
-                type="submit"
-                onClick={handleSubmitCheckRole}
-                disabled={loading}
-                className="bg-white w-full rounded-full p-2 text-black font-bold"
-              >
-                {loading ? "Loading..." : "Check"}
-              </button>
+              {isApi && (
+                <button
+                  type="submit"
+                  onClick={handleSubmitCheckRole}
+                  disabled={loading}
+                  className="bg-white w-full rounded-full p-2 text-black font-bold"
+                >
+                  {loading ? "Loading..." : "Check"}
+                </button>
+              )}
             </form>
           </div>
           <div className="p-4 bg-secondary rounded-xl">
@@ -261,12 +264,12 @@ const Product = ({
               <p className="text-xl font-bold">Rs. {total}</p>
             </div>
             {session?.user ? (
-              playerAvailable && (
+              (!isApi || playerAvailable) && (
                 <button
                   onClick={createOrder}
                   className="bg-yellow-300 w-full rounded-full p-2 text-black font-bold mt-4"
                 >
-                  Pay
+                  {loading ? "Loading..." : "Pay Now"}
                 </button>
               )
             ) : (

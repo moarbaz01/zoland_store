@@ -51,14 +51,8 @@ const OrderView = ({ order }: { order: Order }) => {
   };
 
   return (
-    <div className="md:pl-72 p-6 min-h-screen bg-gray-900 text-black">
-      <Typography
-        variant="h4"
-        sx={{
-          fontWeight: "bold",
-          marginBottom: "24px",
-        }}
-      >
+    <div className="md:pl-72 md:py-6 md:px-6 px-4 min-h-screen  ">
+      <Typography variant="h4" className="text-white mb-6">
         Order Details
       </Typography>
 
@@ -71,26 +65,13 @@ const OrderView = ({ order }: { order: Order }) => {
           maxWidth: "600px",
         }}
       >
-        <Typography
-          variant="h6"
-          sx={{
-            fontWeight: "bold",
-            marginBottom: "16px",
-          }}
-        >
+        <Typography variant="h6" className="text-white mb-4">
           Order Information
         </Typography>
         <Divider sx={{ backgroundColor: "#4A5568", marginBottom: "16px" }} />
 
         {/* Simplified Order Details */}
-        <Box
-          sx={{
-            backgroundColor: "#F7FAFC",
-            padding: "16px",
-            borderRadius: "10px",
-            boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-          }}
-        >
+        <Box component="div" className="bg-gray-800 p-4">
           <Box sx={{ marginBottom: "10px" }}>
             <Typography variant="body1" sx={{ fontWeight: "bold" }}>
               Order ID:
@@ -141,13 +122,16 @@ const OrderView = ({ order }: { order: Order }) => {
 
       {/* Status Update Section */}
       <Box
-        sx={{
-          backgroundColor: "#2D3748",
-          padding: "16px",
-          borderRadius: "8px",
-          maxWidth: "200px",
-          marginTop: "20px",
-        }}
+        component="div"
+        className="
+      bg-gray-800
+      flex-1
+      p-4
+      mt-6
+      rounded-md
+      flex flex-col gap-2
+      w-fit
+      "
       >
         <Typography
           variant="h6"

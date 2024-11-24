@@ -39,7 +39,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: "Unauthorized" });
     }
     const json = await req.json();
-    console.log("json : ", json);
 
     // Validate the input
     const validatedData = orderSchema.parse(json);
@@ -157,7 +156,6 @@ export async function DELETE(req: NextRequest) {
     if (!token) {
       return NextResponse.json({ message: "Unauthorized" });
     }
-    console.log("token : ", token);
     if (token?.role !== "admin") {
       return NextResponse.json({ message: "Unauthorized" });
     }

@@ -6,6 +6,8 @@ import { Payment } from "@/models/payment.model";
 import { dbConnect } from "@/lib/database";
 import { User } from "@/models/user.model";
 import { generateSign } from "@/utils/hash";
+import { sendEmail } from "@/utils/nodemailer";
+import createEmailTemplate from "@/template/emailTemplate";
 
 
 // Generate checksum
@@ -93,23 +95,21 @@ export async function POST(req: Request) {
     });
 
     // Update Order Status
-    const order = await Order.findByIdAndUpdate(
-      orderId,
-      {
-        paymentId: payment._id,
-        status: "success",
-      },
-      { new: true }
-    );
+    const order = await Order.findById(orderId).populate("product");
+
+    order.paymentId = payment._id;
+    order.status = order.orderType === "API Order" ? "success" : "pending";
+    await order.save();
 
     // Create game order
-    const orderResponse = await gameOrderRequest(order);
-    if (!orderResponse?.result) {
-      await Order.findByIdAndDelete(orderId);
-      return NextResponse.redirect(
-        new URL(`/failed?message="Top-UP Failed"}`, process.env.NEXT_PUBLIC_BASE_URL!),
-        { status: 302 }  // Explicitly setting status as 302 (default)
-      );
+    if (order.orderType === "API Order") {
+      const orderResponse = await gameOrderRequest(order);
+      if (orderResponse.result && orderResponse.result === null) {
+        return NextResponse.redirect(
+          new URL(`/failed?message="Top-UP Failed"}`, process.env.NEXT_PUBLIC_BASE_URL!),
+          { status: 302 }  // Explicitly setting status as 302 (default)
+        );
+      }
     }
 
     // Update User's order history
@@ -118,6 +118,10 @@ export async function POST(req: Request) {
         order: order._id,
       },
     });
+
+    if (order.orderType === "Custom Order") {
+      await sendEmail(email, "Order Placed", createEmailTemplate(order))
+    }
 
     // Redirection on success
     return NextResponse.redirect(

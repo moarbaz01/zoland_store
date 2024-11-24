@@ -41,7 +41,7 @@ const Navbar = () => {
   }
   return (
     <>
-      <div className="w-full py-6 px-6 fixed top-0 left-0 z-[999] md:hidden bg-gray-700">
+      <div className="w-full py-4 md:px-6 px-4 fixed top-0 left-0 z-[999] md:hidden bg-gray-700">
         <div className="flex justify-between items-center">
           <div className="text-white font-bold text-xl">
             Zoland <span className="text-primary">Admin</span>

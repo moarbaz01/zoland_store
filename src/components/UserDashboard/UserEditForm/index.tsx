@@ -61,7 +61,7 @@ const UserEditForm = () => {
   }, [user]);
 
   return (
-    <Paper className="p-6">
+    <Paper className="md:py-6 md:px-6 px-4">
       {/* Name */}
       <TextField
         fullWidth

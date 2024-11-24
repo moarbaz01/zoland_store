@@ -48,7 +48,7 @@ const ProductForm = ({ product }: { product?: Product }) => {
     apiName: product?.apiName || "",
     image: product?.image || null,
     isDeleted: product?.isDeleted || false,
-    category: product?.category || "",
+    category: product?.category || "game",
     cost: product?.cost || [{ id: "", amount: "", price: "" }],
     stock: product?.stock || false, // Stock as boolean
   });
@@ -171,7 +171,7 @@ const ProductForm = ({ product }: { product?: Product }) => {
   };
 
   return (
-    <div className="md:pl-72 p-6 min-h-screen bg-gray-900">
+    <div className="md:pl-72 md:py-6 md:px-6 px-4 min-h-screen bg-gray-900">
       <h1 className="text-2xl font-bold text-white mb-6">
         {product ? "Edit Product" : "Create Product"}
       </h1>
@@ -255,7 +255,6 @@ const ProductForm = ({ product }: { product?: Product }) => {
               >
                 <MenuItem value="">Select Region</MenuItem>
                 <MenuItem value="brazil">Brazil</MenuItem>
-                <MenuItem value="phillipins">Phillipins</MenuItem>
               </Select>
             </>
           )}
@@ -274,6 +273,7 @@ const ProductForm = ({ product }: { product?: Product }) => {
           >
             <MenuItem value="">Select Game</MenuItem>
             <MenuItem value="mobilelegends">MLBB</MenuItem>
+            <MenuItem value="Custom Game">Custom</MenuItem>
           </Select>
 
           {/* Stock (Boolean) */}

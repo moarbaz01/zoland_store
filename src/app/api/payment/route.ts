@@ -1,9 +1,20 @@
 import { Payment } from "@/models/payment.model";
-import { NextResponse } from "next/server";
+import { getToken } from "next-auth/jwt";
+import { NextRequest, NextResponse } from "next/server";
 
 // **GET**: Retrieve orders
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   try {
+    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+
+    // If the user is not authenticated, return Unauthorized
+    if (!token) {
+      return NextResponse.json({ message: "Unauthorized" });
+    }
+
+    if (token?.role !== "admin") {
+      return NextResponse.json({ message: "Unauthorized" });
+    }
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
 

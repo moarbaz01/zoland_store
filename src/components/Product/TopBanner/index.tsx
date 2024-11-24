@@ -22,7 +22,8 @@ const TopBanner = ({ image, name }: Game) => {
             alt={name || ""}
             width={250}
             height={250}
-            className="hidden md:block object-cover rounded-xl"
+            className="hidden md:block 
+            w-[300px] h-[300px] object-cover rounded-xl"
           />
           <Image
             src={image || ""}
