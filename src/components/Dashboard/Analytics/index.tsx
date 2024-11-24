@@ -1,27 +1,15 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Bar } from "react-chartjs-2";
-import {
-  Chart as ChartJS,
-  BarElement,
-  CategoryScale,
-  LinearScale,
-  Tooltip,
-  Legend,
-} from "chart.js";
 import { FaShoppingCart, FaBox, FaUsers, FaRupeeSign } from "react-icons/fa";
 import toast from "react-hot-toast";
 import { CircularProgress } from "@mui/material";
-
-ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
 interface AnalyticsData {
   orders: number | null;
   products: number | null;
   customers: number | null;
   revenue: number | null;
-  monthlySales: { month: number; totalSales: number }[] | [];
 }
 
 const Analytics = () => {
@@ -30,7 +18,6 @@ const Analytics = () => {
     products: null,
     customers: null,
     revenue: null,
-    monthlySales: [],
   });
 
   useEffect(() => {
@@ -52,31 +39,6 @@ const Analytics = () => {
 
     fetchData();
   }, []);
-
-  const barData = {
-    labels: [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
-    ],
-    datasets: [
-      {
-        label: "Sales (₹)",
-        data:
-          analyticsData.monthlySales?.map((item) => item.totalSales || 0) || [],
-        backgroundColor: "#34D399",
-      },
-    ],
-  };
 
   return (
     <div className="md:pl-72 md:py-6 md:px-6 px-4 min-h-screen bg-gray-900">
@@ -144,44 +106,6 @@ const Analytics = () => {
                 <CircularProgress size={12} />
               )}
             </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Charts Section */}
-      <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="p-6 bg-gray-800 shadow rounded-lg">
-          <h3 className="text-lg font-bold text-gray-100 mb-4">
-            Monthly Sales
-          </h3>
-          <div style={{ height: "400px", width: "100%" }}>
-            <Bar
-              data={barData}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                  legend: {
-                    labels: {
-                      color: "#E5E7EB",
-                    },
-                  },
-                },
-                scales: {
-                  x: {
-                    ticks: {
-                      color: "#E5E7EB",
-                    },
-                  },
-                  y: {
-                    ticks: {
-                      color: "#E5E7EB",
-                    },
-                  },
-                },
-              }}
-              style={{ height: "100%" }}
-            />
           </div>
         </div>
       </div>

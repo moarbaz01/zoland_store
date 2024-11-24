@@ -12,6 +12,10 @@ export async function GET(req: NextRequest) {
     if (!token) {
       return NextResponse.json({ message: "Unauthorized" });
     }
+    if (token.role !== "admin") {
+      return NextResponse.json({ message: "Unauthorized" });
+    }
+
     const orders = await Order.countDocuments();
     const products = await Product.countDocuments();
     const customers = await User.countDocuments();
@@ -27,40 +31,12 @@ export async function GET(req: NextRequest) {
     ]);
     const revenue = totalRevenue.length > 0 ? totalRevenue[0].total : 0;
 
-    // Aggregate monthly sales
-    const monthlySales = await Order.aggregate([
-      {
-        $project: {
-          month: { $month: "$createdAt" }, // Extract the month from the `createdAt` field
-          amount: { $toDouble: "$amount" }, // Convert amount to a number
-        },
-      },
-      {
-        $group: {
-          _id: "$month", // Group by month
-          totalSales: { $sum: "$amount" }, // Sum the sales for the month
-          totalOrders: { $count: {} }, // Count the orders for the month
-        },
-      },
-      {
-        $sort: { _id: 1 }, // Sort by month (January = 1, February = 2, etc.)
-      },
-    ]);
-
-    // Format the monthly sales data
-    const formattedMonthlySales = monthlySales.map((item) => ({
-      month: item._id, // Month number
-      totalSales: item.totalSales,
-      totalOrders: item.totalOrders,
-    }));
-
     // Aggregate the data into a single object
     const data = {
       orders,
       products,
       customers,
       revenue,
-      monthlySales: formattedMonthlySales,
     };
 
     // Respond with the aggregated data

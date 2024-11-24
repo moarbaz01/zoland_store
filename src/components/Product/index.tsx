@@ -131,19 +131,7 @@ const Product = ({
     } finally {
       setLoading(false);
     }
-  }, [
-    userId,
-    zoneId,
-    cost,
-    amountSelected,
-    session?.user.id,
-    session?.user.email,
-    _id,
-    stock,
-    game,
-    isApi,
-    router,
-  ]);
+  }, [userId, zoneId, cost, amountSelected, _id, stock, game, isApi, router]);
 
   // Calculate Total
   const total = useMemo(() => {
