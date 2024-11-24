@@ -28,44 +28,6 @@ const orderSchema = z.object({
   status: z.enum(["pending", "success"]).optional(),
 });
 
-// **POST**: Create a new order
-export async function POST(req: NextRequest) {
-  try {
-
-    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-
-    // If the user is not authenticated, return Unauthorized
-    if (!token) {
-      return NextResponse.json({ message: "Unauthorized" });
-    }
-    const json = await req.json();
-
-    // Validate the input
-    const validatedData = orderSchema.parse(json);
-
-    // Verify that the product exists (if provided)
-    if (validatedData.product) {
-      const productExists = await Product.findById(validatedData.product);
-      if (!productExists) {
-        return NextResponse.json(
-          { error: "Product not found" },
-          { status: 404 }
-        );
-      }
-    }
-
-    // Create and save the order
-    const order = await Order.create(validatedData);
-    return NextResponse.json(order, { status: 201 });
-  } catch (error) {
-    console.error("POST Error:", error);
-    return NextResponse.json(
-      { error: error.message || "Failed to create order" },
-      { status: 400 }
-    );
-  }
-}
-
 // **GET**: Retrieve orders
 export async function GET(req: NextRequest) {
   try {

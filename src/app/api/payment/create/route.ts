@@ -7,13 +7,21 @@ import { getToken } from "next-auth/jwt";
 
 const schema = z.object({
   amount: z.string(),
-  orderId: z.string(),
-  user: z.object({
-    id: z.string(),
-    name: z.string(),
-    email: z.string().email(),
-  }),
+  costId: z.string().min(1, "Cost ID is required"),
+  orderDetails: z.string(), // Accepts any object
+  orderType: z.string(),
+  gameCredentials: z
+    .object({
+      userId: z.string().optional(),
+      zoneId: z.string().optional(),
+      game: z.string().optional(),
+    })
+    .optional(),
+  paymentId: z.string().nullable().optional(),
+  product: z.string().optional(), // Product ID reference
+  status: z.enum(["pending", "success"]).optional(),
 });
+
 
 const payRequest = async (payloadMain: string, checksum: string) => {
   const response = await axios.post(
@@ -40,6 +48,11 @@ export async function POST(req: NextRequest) {
     if (!token) {
       return NextResponse.json({ message: "Unauthorized" });
     }
+    const id = token.id as string;
+    const name = token.name as string;
+    const email = token.email as string;
+
+
     const result = schema.safeParse({
       ...(await req.json()),
     });
@@ -51,21 +64,24 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { amount, orderId, user } = result.data;
+    const body = result.data;
+    // convert body in to string
+    const bodyString = JSON.stringify(body);
     const transactionId = uuid().slice(10).replaceAll("-", "");
 
     const data = {
-      name: user?.name,
-      amount: parseInt(amount) * 100,
+      name: name,
+      amount: parseInt(body.amount) * 100,
       merchantId: process.env.PHONEPE_MERCHANT_ID!,
       merchantTransactionId: `T${transactionId}`,
-      merchantUserId: `M${user?.name}${user?.id}`,
+      merchantUserId: `M${name}${id}`,
       redirectUrl: `${process.env
-        .NEXT_PUBLIC_BASE_URL!}/api/payment/verify?merchantTransactionId=T${transactionId}&orderId=${orderId}&user=${user.id
-        }&email=${user.email}`,
+        .NEXT_PUBLIC_BASE_URL!}/api/payment/verify?merchantTransactionId=T${transactionId}&order=${bodyString}&userId=${id}&email=${email}`,
       redirectMode: "POST",
       paymentInstrument: { type: "PAY_PAGE" },
     };
+
+    console.log("CheckSum Data", data);
 
     const { payloadMain, checksum } = generateChecksum(data);
 

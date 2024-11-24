@@ -82,39 +82,6 @@ const Product = ({
     await fetchCheckRole();
   };
 
-  // Handle Pay
-  const handlePay = useCallback(
-    async (orderId: string) => {
-      try {
-        const res = await axios.post(
-          "/api/payment/create",
-          {
-            amount: cost[amountSelected].price,
-            orderId,
-            user: {
-              name: session?.user.name,
-              email: session?.user.email,
-              id: session?.user.id,
-            },
-          },
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        const data = res.data;
-        console.log("data : ", data);
-        if (data.data.code === "PAYMENT_INITIATED") {
-          router.push(data.data.data.instrumentResponse.redirectInfo.url);
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    },
-    [session?.user, cost, amountSelected, router]
-  );
-
   // Create Order
   const createOrder = useCallback(async () => {
     if (!userId) {
@@ -134,23 +101,29 @@ const Product = ({
     }
     try {
       setLoading(true);
-      const res = await axios.post("/api/order", {
-        user: session?.user.id,
-        email: session?.user.email,
-        costId: cost[amountSelected].id,
-        orderDetails: cost[amountSelected].amount,
-        orderType: isApi ? "API Order" : "Custom Order",
-        gameCredentials: {
-          userId,
-          zoneId,
-          game,
+      const res = await axios.post(
+        "/api/payment/create",
+        {
+          costId: cost[amountSelected].id,
+          orderDetails: cost[amountSelected].amount,
+          orderType: isApi ? "API Order" : "Custom Order",
+          gameCredentials: {
+            userId,
+            zoneId,
+            game,
+          },
+          product: _id,
+          amount: cost[amountSelected].price,
         },
-        product: _id,
-        amount: cost[amountSelected].price,
-      });
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
       const data = res.data;
-      if (res.status === 201 || res.status === 200) {
-        await handlePay(data._id);
+      if (data.data.code === "PAYMENT_INITIATED") {
+        router.push(data.data.data.instrumentResponse.redirectInfo.url);
       }
     } catch (error) {
       console.log(error);
@@ -168,7 +141,6 @@ const Product = ({
     _id,
     stock,
     game,
-    handlePay,
     isApi,
   ]);
 

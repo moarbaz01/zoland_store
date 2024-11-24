@@ -9,7 +9,6 @@ import { generateSign } from "@/utils/hash";
 import { sendEmail } from "@/utils/nodemailer";
 import createEmailTemplate from "@/template/emailTemplate";
 
-
 // Generate checksum
 const generateChecksum = (merchantId: string, merchantTransactionId: string) => {
   const string =
@@ -67,36 +66,46 @@ export async function POST(req: Request) {
     const { searchParams } = new URL(req.url);
     const merchantTransactionId = searchParams.get("merchantTransactionId");
     const merchantId = process.env.PHONEPE_MERCHANT_ID;
-    const orderId = searchParams.get("orderId");
-    const user = searchParams.get("user");
+    const orderString = searchParams.get("order");
     const email = searchParams.get("email");
+    const userId = searchParams.get("userId");
+
+    const orderData = orderString ? JSON.parse(orderString) : null;
+
+    // If order doesn't exist or it's already processed, return a failure response
+    if (!orderData) {
+      return NextResponse.redirect(
+        new URL(`/failed?message=Order details found`, process.env.NEXT_PUBLIC_BASE_URL!),
+        { status: 302 }
+      );
+    }
 
     // Verify Status
     const data = await statusRequest(merchantId!, merchantTransactionId!);
+    console.log("pAYMEN STatus", data);
 
     // If payment failed
     if (!data.success) {
-      await Order.findByIdAndDelete(orderId);
       return NextResponse.redirect(
         new URL(`/failed?message=Payment Failed`, process.env.NEXT_PUBLIC_BASE_URL!),
-        { status: 302 }  // Explicitly setting status as 302 (default)
-      );  // Explicitly setting status as 302 (default
-    }
+        { status: 302 }
+      );
+    };
+
+    const order = await Order.create({ ...orderData, email, user: userId });
 
     // Create Payment record
     const payment = await Payment.create({
-      orderId: orderId,
+      orderId: order._id,
       transactionId: merchantTransactionId,
       status: "success",
       amount: parseInt(data.data.amount) / 100,
       method: data.data.paymentInstrument?.type,
-      user,
+      user: userId,
       email,
     });
 
     // Update Order Status
-    const order = await Order.findById(orderId).populate("product");
-
     order.paymentId = payment._id;
     order.status = order.orderType === "API Order" ? "success" : "pending";
     await order.save();
@@ -106,27 +115,27 @@ export async function POST(req: Request) {
       const orderResponse = await gameOrderRequest(order);
       if (orderResponse.result && orderResponse.result === null) {
         return NextResponse.redirect(
-          new URL(`/failed?message="Top-UP Failed"}`, process.env.NEXT_PUBLIC_BASE_URL!),
-          { status: 302 }  // Explicitly setting status as 302 (default)
+          new URL(`/failed?message=Top-UP Failed`, process.env.NEXT_PUBLIC_BASE_URL!),
+          { status: 302 }
         );
       }
     }
 
     // Update User's order history
-    await User.findByIdAndUpdate(user, {
+    await User.findByIdAndUpdate(userId, {
       $push: {
         order: order._id,
       },
     });
 
     if (order.orderType === "Custom Order") {
-      await sendEmail(email, "Order Placed", createEmailTemplate(order))
+      await sendEmail(email, "Order Placed", createEmailTemplate(order));
     }
 
     // Redirection on success
     return NextResponse.redirect(
       new URL(`/success?transactionId=${merchantTransactionId}&message=success`, process.env.NEXT_PUBLIC_BASE_URL!),
-      { status: 302 }  // Explicitly setting status as 302 (default)
+      { status: 302 }
     );
   } catch (error: any) {
     console.error("Error in payment callback:", error.message);
