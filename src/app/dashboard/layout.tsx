@@ -1,4 +1,3 @@
-export const runtime = "edge";
 import Navbar from "@/components/Dashboard/Navbar";
 import Sidebar from "@/components/Dashboard/Sidebar";
 

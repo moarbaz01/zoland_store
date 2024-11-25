@@ -1,5 +1,4 @@
 "use client";
-export const runtime = "edge";
 import Loader from "@/components/Loader";
 import Link from "next/link";
 import { notFound, useSearchParams } from "next/navigation";

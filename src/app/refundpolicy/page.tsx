@@ -1,4 +1,3 @@
-export const runtime = "edge";
 import RefundPolicy from "@/components/RefundPolicy";
 
 const Page = () => {

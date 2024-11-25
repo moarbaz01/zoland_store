@@ -1,4 +1,3 @@
-export const runtime = "edge";
 import SignIn from "@/components/SignIn";
 
 const Login = () => {

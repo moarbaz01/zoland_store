@@ -1,4 +1,3 @@
-export const runtime = "edge";
 import TermsAndConditions from "@/components/TermsAndConditions";
 
 const Page = () => {

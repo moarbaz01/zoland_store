@@ -1,6 +1,4 @@
-export const runtime = "nodejs";
 import { NextResponse } from "next/server";
-import crypto from "crypto";
 import axios from "axios";
 import { Order } from "@/models/order.model";
 import { Payment } from "@/models/payment.model";
@@ -9,14 +7,16 @@ import { User } from "@/models/user.model";
 import { generateSign } from "@/utils/hash";
 import { sendEmail } from "@/utils/nodemailer";
 import createEmailTemplate from "@/template/emailTemplate";
+import { SHA256 } from "crypto-js";
 
 // Generate checksum
 const generateChecksum = (merchantId: string, merchantTransactionId: string) => {
-  const string =
-    `/pg/v1/status/${merchantId}/${merchantTransactionId}` +
-    process.env.PHONEPE_SALT_KEY!;
-  const sha256 = crypto.createHash("sha256").update(string).digest("hex");
-  const checksum = sha256 + "###" + process.env.PHONEPE_SALT_INDEX!;
+  const string = `/pg/v1/status/${merchantId}/${merchantTransactionId}` + process.env.PHONEPE_SALT_KEY;
+
+  const sha256 = SHA256(string).toString();
+
+  const checksum = sha256 + "###" + process.env.PHONEPE_SALT_INDEX;
+
   return checksum;
 };
 
