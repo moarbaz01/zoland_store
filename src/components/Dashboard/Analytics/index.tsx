@@ -25,7 +25,7 @@ const Analytics = () => {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/analytics`,
+          `/api/analytics`,
           {
             headers: {
               "Content-Type": "application/json",
