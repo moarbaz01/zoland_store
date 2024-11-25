@@ -1,3 +1,5 @@
+import { setupDevPlatform } from "@cloudflare/next-on-pages/next-dev";
+
 const nextConfig = {
   images: {
     domains: ["lh3.googleusercontent.com", "res.cloudinary.com"],
@@ -8,5 +10,9 @@ const nextConfig = {
     removeConsole: process.env.NODE_ENV === "production", // Removes console logs in production
   },
 };
+
+if (process.env.NODE_ENV === "development") {
+  await setupDevPlatform();
+}
 
 export default nextConfig;

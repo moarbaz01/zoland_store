@@ -46,10 +46,7 @@ const AboutUs = () => {
                 <strong>Registered Address:</strong> Y 80/B Mission Vengthlang
                 Aizawl, MIZORAM 796001
               </li>
-              <li>
-                <strong>Operational Address:</strong> Y 80/B Mission Vengthlang
-                Aizawl, MIZORAM 796001
-              </li>
+
               <li>
                 <strong>Telephone No:</strong> +91 7085414571
               </li>
