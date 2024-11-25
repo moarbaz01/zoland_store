@@ -1,3 +1,4 @@
+export const runtime = "nodejs";
 import crypto from "crypto";
 
 type Params = Record<string, string | number>;

@@ -1,4 +1,3 @@
-export const runtime = "nodejs";
 import { dbConnect } from "@/lib/database";
 import { Product } from "@/models/product.model";
 import { cloudinaryUpload } from "@/utils/cloudinary";
