@@ -1,3 +1,4 @@
+export const runtime = "node";
 import { NextResponse } from "next/server";
 import z from "zod";
 import axios from "axios";

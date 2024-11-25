@@ -1,3 +1,4 @@
+export const runtime = "node";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { dbConnect } from "@/lib/database";

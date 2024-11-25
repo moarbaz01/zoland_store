@@ -1,3 +1,4 @@
+export const runtime = "node";
 import { Order } from "@/models/order.model";
 import { Product } from "@/models/product.model";
 import { User } from "@/models/user.model";

@@ -1,3 +1,4 @@
+export const runtime = "node";
 import { Payment } from "@/models/payment.model";
 import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";

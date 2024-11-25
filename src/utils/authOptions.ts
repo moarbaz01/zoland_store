@@ -1,3 +1,4 @@
+export const runtime = "node";
 import { dbConnect } from "@/lib/database";
 import { User } from "@/models/user.model";
 import { AuthOptions, Session } from "next-auth";

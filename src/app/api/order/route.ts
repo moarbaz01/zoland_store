@@ -1,3 +1,4 @@
+export const runtime = "node";
 import { dbConnect } from "@/lib/database";
 import { Order } from "@/models/order.model";
 import { getToken } from "next-auth/jwt";
