@@ -1,4 +1,4 @@
-// pages/404.tsx
+export const runtime = "edge";
 import Link from "next/link";
 
 const NotFound = () => {

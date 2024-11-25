@@ -1,3 +1,4 @@
+export const runtime = "edge";
 import PrivacyPolicy from "@/components/PrivacyPolicy";
 
 const Page = () => {

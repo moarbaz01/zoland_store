@@ -1,3 +1,4 @@
+export const runtime = "edge";
 import Product from "@/components/Product";
 
 // Page component

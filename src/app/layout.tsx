@@ -1,5 +1,4 @@
 // app/layout.tsx
-export const runtime = "edge";
 import type { Metadata } from "next";
 import NextTopLoader from "nextjs-toploader";
 import { Poppins } from "next/font/google";

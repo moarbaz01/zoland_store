@@ -1,3 +1,4 @@
+export const runtime = "edge";
 import AboutUs from "@/components/About";
 
 const Page = () => {
