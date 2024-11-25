@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { FaShoppingCart, FaBox, FaUsers, FaRupeeSign } from "react-icons/fa";
 import toast from "react-hot-toast";
 import { CircularProgress } from "@mui/material";
+import axios from "axios";
 
 interface AnalyticsData {
   orders: number | null;
@@ -23,13 +24,18 @@ const Analytics = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/analytics`
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}/analytics`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
         );
-        if (!response.ok) {
-          throw new Error("Failed to fetch analytics data");
+        if (response.status !== 200) {
+          toast.error("Failed to fetch analytics data. Please try again.");
         }
-        const data = await response.json();
+        const data = response.data;
         setAnalyticsData(data);
       } catch (error) {
         console.error("Error fetching analytics data:", error);

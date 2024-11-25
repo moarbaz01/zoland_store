@@ -1,5 +1,3 @@
-// app/layout.tsx
-export const runtime = "edge";
 import type { Metadata } from "next";
 import NextTopLoader from "nextjs-toploader";
 import { Poppins } from "next/font/google";
@@ -22,12 +20,8 @@ const popins = Poppins({
 
 export default function RootLayout({
   children,
-  hasNavBar = true,
-  hasFooter = true, // Default to true if not passed
 }: Readonly<{
   children: React.ReactNode;
-  hasNavBar?: boolean;
-  hasFooter?: boolean;
 }>) {
   return (
     <html lang="en">
@@ -35,9 +29,9 @@ export default function RootLayout({
         <NextTopLoader color="#ab20fd" />
         <Provider>
           <Toaster />
-          {hasNavBar && <Navbar />} {/* Conditionally render Navbar */}
+          <Navbar /> {/* Conditionally render Navbar */}
           {children}
-          {hasFooter && <Footer />}
+          <Footer />
         </Provider>
       </body>
     </html>
