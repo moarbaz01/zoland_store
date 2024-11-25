@@ -39,7 +39,7 @@ const Page = () => {
     return <Loader />;
   }
 
-  if (error || !orders) {
+  if (error) {
     return <div>Error loading orders</div>; // Display error if there's an issue fetching data
   }
 
