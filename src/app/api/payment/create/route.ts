@@ -1,4 +1,4 @@
-export const runtime = "node";
+export const runtime = "nodejs";
 import axios from "axios";
 import { NextRequest, NextResponse } from "next/server";
 import z from "zod";

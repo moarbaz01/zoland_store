@@ -1,4 +1,4 @@
-export const runtime = "node";
+export const runtime = "nodejs";
 import { Payment } from "@/models/payment.model";
 import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";

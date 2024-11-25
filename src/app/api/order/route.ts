@@ -1,4 +1,4 @@
-export const runtime = "node";
+export const runtime = "nodejs";
 import { dbConnect } from "@/lib/database";
 import { Order } from "@/models/order.model";
 import { getToken } from "next-auth/jwt";

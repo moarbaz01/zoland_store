@@ -1,4 +1,4 @@
-export const runtime = "node";
+export const runtime = "nodejs";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { dbConnect } from "@/lib/database";
