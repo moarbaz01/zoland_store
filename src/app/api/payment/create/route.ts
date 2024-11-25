@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
 
     const body = result.data;
     // convert body in to string
-    const bodyString = JSON.stringify(body);
+    const bodyString = encodeURIComponent(JSON.stringify(body));
     const transactionId = uuid().slice(10).replaceAll("-", "");
 
     const data = {

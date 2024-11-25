@@ -10,8 +10,13 @@ import createEmailTemplate from "@/template/emailTemplate";
 import { SHA256 } from "crypto-js";
 
 // Generate checksum
-const generateChecksum = (merchantId: string, merchantTransactionId: string) => {
-  const string = `/pg/v1/status/${merchantId}/${merchantTransactionId}` + process.env.PHONEPE_SALT_KEY;
+const generateChecksum = (
+  merchantId: string,
+  merchantTransactionId: string
+) => {
+  const string =
+    `/pg/v1/status/${merchantId}/${merchantTransactionId}` +
+    process.env.PHONEPE_SALT_KEY;
 
   const sha256 = SHA256(string).toString();
 
@@ -21,7 +26,10 @@ const generateChecksum = (merchantId: string, merchantTransactionId: string) => 
 };
 
 // Get Status Request
-const statusRequest = async (merchantId: string, merchantTransactionId: string) => {
+const statusRequest = async (
+  merchantId: string,
+  merchantTransactionId: string
+) => {
   const checksum = generateChecksum(merchantId, merchantTransactionId);
   const url = `${process.env.PHONEPE_BASE_URL}/pg/v1/status/${merchantId}/${merchantTransactionId}`;
   const options = {
@@ -49,12 +57,15 @@ const gameOrderRequest = async (order: any) => {
     productid: order.costId,
     time: timestamp,
   };
+
+  console.log("Params:", params);
   const sign = generateSign(params, process.env.SMILE_ONE_API_KEY!);
   const res = await axios.post(
     `${process.env.SMILE_ONE_API_URL!}/createorder`,
     { ...params, sign },
     { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
   );
+  console.log("Game Order Response:", res.data);
   if (res.data.message !== "success") {
     return { result: null, message: res.data.message };
   }
@@ -67,16 +78,35 @@ export async function POST(req: Request) {
     const { searchParams } = new URL(req.url);
     const merchantTransactionId = searchParams.get("merchantTransactionId");
     const merchantId = process.env.PHONEPE_MERCHANT_ID;
-    const orderString = searchParams.get("order");
     const email = searchParams.get("email");
     const userId = searchParams.get("userId");
+    const orderString = searchParams.get("order");
+    if (!orderString) {
+      return NextResponse.json(
+        { message: "Missing order data" },
+        { status: 400 }
+      );
+    }
 
-    const orderData = orderString ? JSON.parse(orderString) : null;
+    let orderData;
+    try {
+      orderData = JSON.parse(decodeURIComponent(orderString));
+    } catch (error) {
+      console.error("Failed to parse order string:", error.message);
+      return NextResponse.json(
+        { message: "Invalid order data", error: error.message },
+        { status: 400 }
+      );
+    }
+    console.log("Order Data", orderData);
 
     // If order doesn't exist or it's already processed, return a failure response
     if (!orderData) {
       return NextResponse.redirect(
-        new URL(`/failed?message=Order details found`, process.env.NEXT_PUBLIC_BASE_URL!),
+        new URL(
+          `/failed?message=Order details not found`,
+          process.env.NEXT_PUBLIC_BASE_URL!
+        ),
         { status: 302 }
       );
     }
@@ -88,10 +118,13 @@ export async function POST(req: Request) {
     // If payment failed
     if (!data.success) {
       return NextResponse.redirect(
-        new URL(`/failed?message=Payment Failed`, process.env.NEXT_PUBLIC_BASE_URL!),
+        new URL(
+          `/failed?message=Payment Failed`,
+          process.env.NEXT_PUBLIC_BASE_URL!
+        ),
         { status: 302 }
       );
-    };
+    }
 
     const order = await Order.create({ ...orderData, email, user: userId });
 
@@ -114,9 +147,15 @@ export async function POST(req: Request) {
     // Create game order
     if (order.orderType === "API Order") {
       const orderResponse = await gameOrderRequest(order);
-      if (orderResponse.result && orderResponse.result === null) {
+      if (
+        orderResponse?.result === null ||
+        orderResponse.message !== "success"
+      ) {
         return NextResponse.redirect(
-          new URL(`/failed?message=Top-UP Failed`, process.env.NEXT_PUBLIC_BASE_URL!),
+          new URL(
+            `/failed?message=Top-UP Failed`,
+            process.env.NEXT_PUBLIC_BASE_URL!
+          ),
           { status: 302 }
         );
       }
@@ -135,7 +174,10 @@ export async function POST(req: Request) {
 
     // Redirection on success
     return NextResponse.redirect(
-      new URL(`/success?transactionId=${merchantTransactionId}&message=success`, process.env.NEXT_PUBLIC_BASE_URL!),
+      new URL(
+        `/success?transactionId=${merchantTransactionId}&message=success`,
+        process.env.NEXT_PUBLIC_BASE_URL!
+      ),
       { status: 302 }
     );
   } catch (error: any) {
