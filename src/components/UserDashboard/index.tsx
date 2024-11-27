@@ -64,7 +64,12 @@ const UserDashboard = () => {
           (item: any) => item.user === session?.user?.id
         );
         if (filterData.length > 0) {
-          setOrders(filterData);
+          const sortedData = filterData.sort((a: any, b: any) => {
+            return (
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+            );
+          });
+          setOrders(sortedData);
         }
         console.log(filterData);
       }
