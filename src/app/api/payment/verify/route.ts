@@ -58,55 +58,42 @@ const gameOrderRequest = async (order: any) => {
   // Prepare API URL based on the region
   const apiUrl =
     order.region === "brazil"
-      ? "https://www.smile.one/br/smilecoin/api/createorder"
+      ? "https://www.smile.one/smilecoin/api/createorder"
       : "https://www.smile.one/ph/smilecoin/api/createorder";
 
-  // Store responses from all iterations
-  const responses = [];
+  const responses = await Promise.all(
+    costIds.map(async (cost) => {
+      const params = {
+        uid: process.env.SMILE_ONE_UID!,
+        email: process.env.SMILE_ONE_EMAIL!,
+        userid: order.gameCredentials.userId,
+        zoneid: order.gameCredentials.zoneId,
+        product: order.gameCredentials.game,
+        productid: cost.toString(),
+        time: timestamp,
+      };
 
-  for (const cost of costIds) {
-    const params = {
-      uid: process.env.SMILE_ONE_UID!,
-      email: process.env.SMILE_ONE_EMAIL!,
-      userid: order.gameCredentials.userId,
-      zoneid: order.gameCredentials.zoneId,
-      product: order.gameCredentials.game,
-      productid: cost.toString(), // Use the costId directly (duplicates intact)
-      time: timestamp,
-    };
+      const sign = generateSign(params, process.env.SMILE_ONE_API_KEY);
 
-    console.log(params, "region", order.region);
-
-    const sign = generateSign(params, process.env.SMILE_ONE_API_KEY);
-
-    try {
-      const res = await axios.post(
-        apiUrl,
-        { ...params, sign },
-        { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
-      );
-      console.log("Game Order Response:", res.data);
-
-      // Collect response
-      responses.push(res.data);
-
-      // Optionally, handle specific responses
-      if (res.data.status === 200) {
-        console.log(`Success for cost: ${cost}`);
+      try {
+        const res = await axios.post(
+          apiUrl,
+          { ...params, sign },
+          { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+        );
+        return { status: res.data.status, data: res.data }; // Success
+      } catch (error: any) {
+        return { status: 500, error: error.message, cost }; // Failure
       }
-    } catch (error: any) {
-      console.error("Error in Game Order Request:", error.message);
-      responses.push({ status: 500, error: error.message, cost });
-    }
-  }
+    })
+  );
 
-  // Process responses after all iterations
+  // Find a successful response or handle failures
   const successResponse = responses.find((res) => res.status === 200);
   if (successResponse) {
-    return successResponse; // Return the first successful response if needed
+    return successResponse;
   }
 
-  // If no success, return a failure response
   return { status: 302, message: "All requests failed.", responses };
 };
 
