@@ -219,7 +219,7 @@ const UserDashboard = () => {
                               ₹{order?.amount}
                             </TableCell>
                             <TableCell align="right">
-                              ₹{order?.paymentId}
+                              {order?.paymentId || "N/A"}
                             </TableCell>
 
                             <TableCell align="right">
