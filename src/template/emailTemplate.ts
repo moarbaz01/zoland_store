@@ -101,7 +101,12 @@ const createEmailTemplate = (order) => {
               <div class="order-details-body">
                 <p><strong>Order ID:</strong> ${order._id}</p>
                 <p><strong>Email:</strong> ${order.email}</p>
-                <p><strong>Product:</strong> ${order.product?.name || "Unknown Product"}</p>
+                <p><strong>Product:</strong> ${
+                  order.product?.name || "Unknown Product"
+                }</p>
+                <p><strong>Product:</strong> ${
+                  order.costId || "Unknown Cost Id"
+                }</p>
                 <p><strong>Amount:</strong> ₹${order.amount}</p>
                 <p><strong>Status:</strong> ${order.status}</p>
                 <p><strong>Order Type:</strong> ${order.orderType}</p>

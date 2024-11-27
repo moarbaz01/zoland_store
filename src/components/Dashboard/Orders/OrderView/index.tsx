@@ -146,6 +146,7 @@ const OrderView = ({ order }: { order: Order }) => {
         >
           <MenuItem value="pending">Pending</MenuItem>
           <MenuItem value="success">Success</MenuItem>
+          <MenuItem value="failed">Failed</MenuItem>
         </Select>
         <Button
           onClick={handleStatusUpdate}

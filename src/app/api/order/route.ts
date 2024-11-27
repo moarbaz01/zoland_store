@@ -14,6 +14,7 @@ const orderSchema = z.object({
   costId: z.string().min(1, "Cost ID is required"),
   orderDetails: z.string(), // Accepts any object
   orderType: z.string(),
+  region: z.string().optional(),
   gameCredentials: z
     .object({
       userId: z.string().optional(),
@@ -24,7 +25,7 @@ const orderSchema = z.object({
   paymentId: z.string().nullable().optional(),
   product: z.string().optional(), // Product ID reference
   amount: z.string().min(1, "Amount is required"),
-  status: z.enum(["pending", "success"]).optional(),
+  status: z.enum(["pending", "success", "failed"]).optional(),
 });
 
 // **GET**: Retrieve orders

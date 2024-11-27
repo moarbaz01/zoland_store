@@ -31,7 +31,6 @@ export async function GET(req: Request) {
 
     if (userId) {
       const user = await User.findById(userId)
-      console.log(user);
       if (!user) {
         return NextResponse.json(
           { message: "User not found" },

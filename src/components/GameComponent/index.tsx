@@ -16,6 +16,7 @@ const GameComponent = ({
         <Image
           src={image}
           alt={name}
+          priority={true}
           height={150}
           width={150}
           className="rounded-xl w-full h-auto aspect-square object-cover"

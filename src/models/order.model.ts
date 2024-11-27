@@ -29,6 +29,9 @@ const orderSchema = new mongoose.Schema(
         type: String,
       },
     },
+    region: {
+      type: String,
+    },
     orderType: {
       type: String,
       required: true,
@@ -47,7 +50,7 @@ const orderSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "success"],
+      enum: ["pending", "success", "failed"],
       default: "pending",
     },
   },

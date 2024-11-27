@@ -255,6 +255,7 @@ const ProductForm = ({ product }: { product?: Product }) => {
               >
                 <MenuItem value="">Select Region</MenuItem>
                 <MenuItem value="brazil">Brazil</MenuItem>
+                <MenuItem value="philippines">Philippines</MenuItem>
               </Select>
             </>
           )}

@@ -12,6 +12,7 @@ const Product = ({
   description,
   image,
   isDeleted,
+  region,
   isApi,
   stock,
   cost,
@@ -21,6 +22,7 @@ const Product = ({
   _id: string;
   description: string;
   image: string;
+  region?: string;
   isDeleted: boolean;
   category: string;
   isApi: boolean;
@@ -32,6 +34,7 @@ const Product = ({
   const [zoneId, setZoneId] = useState("");
   const [amountSelected, setAmountSelected] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [payLoading, setPayLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [playerAvailable, setPlayerAvailable] = useState(false);
@@ -100,13 +103,14 @@ const Product = ({
       return;
     }
     try {
-      setLoading(true);
+      setPayLoading(true);
       const res = await axios.post(
         "/api/payment/create",
         {
           costId: cost[amountSelected].id,
           orderDetails: cost[amountSelected].amount,
           orderType: isApi ? "API Order" : "Custom Order",
+          region,
           gameCredentials: {
             userId,
             zoneId,
@@ -129,7 +133,7 @@ const Product = ({
       console.log(error);
       toast.error("Error Creating Order");
     } finally {
-      setLoading(false);
+      setPayLoading(false);
     }
   }, [userId, zoneId, cost, amountSelected, _id, stock, game, isApi, router]);
 
@@ -227,10 +231,11 @@ const Product = ({
             {session?.user ? (
               (!isApi || playerAvailable) && (
                 <button
+                  disabled={payLoading}
                   onClick={createOrder}
                   className="bg-yellow-300 w-full rounded-full p-2 text-black font-bold mt-4"
                 >
-                  {loading ? "Loading..." : "Pay Now"}
+                  {payLoading ? "Loading..." : "Pay Now"}
                 </button>
               )
             ) : (

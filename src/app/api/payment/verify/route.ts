@@ -46,30 +46,68 @@ const statusRequest = async (
   return response.data;
 };
 
+// Game Order Request
 const gameOrderRequest = async (order: any) => {
   const timestamp = Math.floor(Date.now() / 1000);
-  const params = {
-    uid: process.env.SMILE_ONE_UID!,
-    email: process.env.SMILE_ONE_EMAIL!,
-    userid: order.gameCredentials.userId,
-    zoneid: order.gameCredentials.zoneId,
-    product: order.gameCredentials.game,
-    productid: order.costId,
-    time: timestamp,
-  };
 
-  console.log("Params:", params);
-  const sign = generateSign(params, process.env.SMILE_ONE_API_KEY!);
-  const res = await axios.post(
-    `${process.env.SMILE_ONE_API_URL!}/createorder`,
-    { ...params, sign },
-    { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
-  );
-  console.log("Game Order Response:", res.data);
-  if (res.data.message !== "success") {
-    return { result: null, message: res.data.message };
+  // Extract, flatten, and sort all prices (duplicates allowed)
+  const costIds = order.costId.split("&");
+
+  console.log("costIds", costIds, order.costId);
+
+  // Prepare API URL based on the region
+  const apiUrl =
+    order.region === "brazil"
+      ? "https://www.smile.one/br/smilecoin/api/createorder"
+      : "https://www.smile.one/ph/smilecoin/api/createorder";
+
+  // Store responses from all iterations
+  const responses = [];
+
+  for (const cost of costIds) {
+    const params = {
+      uid: process.env.SMILE_ONE_UID!,
+      email: process.env.SMILE_ONE_EMAIL!,
+      userid: order.gameCredentials.userId,
+      zoneid: order.gameCredentials.zoneId,
+      product: order.gameCredentials.game,
+      productid: cost.toString(), // Use the costId directly (duplicates intact)
+      time: timestamp,
+    };
+
+    console.log(params, "region", order.region);
+
+    const sign = generateSign(params, process.env.SMILE_ONE_API_KEY);
+
+    try {
+      const res = await axios.post(
+        apiUrl,
+        { ...params, sign },
+        { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+      );
+      console.log("Game Order Response:", res.data);
+
+      // Collect response
+      responses.push(res.data);
+
+      // Optionally, handle specific responses
+      if (res.data.status === 200) {
+        console.log(`Success for cost: ${cost}`);
+      }
+    } catch (error: any) {
+      console.error("Error in Game Order Request:", error.message);
+      responses.push({ status: 500, error: error.message, cost });
+    }
   }
-  return res.data;
+
+  // Process responses after all iterations
+  const successResponse = responses.find((res) => res.status === 200);
+  if (successResponse) {
+    return successResponse; // Return the first successful response if needed
+  }
+
+  // If no success, return a failure response
+  return { status: 302, message: "All requests failed.", responses };
 };
 
 export async function POST(req: Request) {
@@ -113,7 +151,7 @@ export async function POST(req: Request) {
 
     // Verify Status
     const data = await statusRequest(merchantId!, merchantTransactionId!);
-    console.log("pAYMEN STatus", data);
+    console.log("Payment Status", data);
 
     // If payment failed
     if (!data.success) {
@@ -139,18 +177,13 @@ export async function POST(req: Request) {
       email,
     });
 
-    // Update Order Status
-    order.paymentId = payment._id;
-    order.status = order.orderType === "API Order" ? "success" : "pending";
-    await order.save();
-
     // Create game order
     if (order.orderType === "API Order") {
       const orderResponse = await gameOrderRequest(order);
-      if (
-        orderResponse?.result === null ||
-        orderResponse.message !== "success"
-      ) {
+      if (orderResponse.status !== 200) {
+        order.paymentId = payment._id;
+        order.status = "failed";
+        await order.save();
         return NextResponse.redirect(
           new URL(
             `/failed?message=Top-UP Failed`,
@@ -160,6 +193,11 @@ export async function POST(req: Request) {
         );
       }
     }
+
+    // Update Order Status
+    order.paymentId = payment._id;
+    order.status = order.orderType === "API Order" ? "success" : "pending";
+    await order.save();
 
     // Update User's order history
     await User.findByIdAndUpdate(userId, {

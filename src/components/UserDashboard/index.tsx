@@ -93,6 +93,7 @@ const UserDashboard = () => {
                 <Image
                   src={session?.user?.image!}
                   alt="User Avatar"
+                  priority={true}
                   width={96}
                   height={96}
                   className="w-full h-full rounded-full"
@@ -153,6 +154,16 @@ const UserDashboard = () => {
                             Order ID
                           </TableSortLabel>
                         </TableCell>
+                        <TableCell>
+                          <TableSortLabel
+                            active={orderBy === "name"}
+                            direction={order}
+                            onClick={() => handleSort("name")}
+                          >
+                            Name
+                          </TableSortLabel>
+                        </TableCell>
+
                         <TableCell align="right">
                           <TableSortLabel
                             active={orderBy === "amount"}
@@ -164,13 +175,14 @@ const UserDashboard = () => {
                         </TableCell>
                         <TableCell align="right">
                           <TableSortLabel
-                            active={orderBy === "gameCredentials"}
+                            active={orderBy === "paymentId"}
                             direction={order}
-                            onClick={() => handleSort("gameCredentials")}
+                            onClick={() => handleSort("paymentId")}
                           >
-                            Game
+                            Payment Id
                           </TableSortLabel>
                         </TableCell>
+
                         <TableCell align="right">
                           <TableSortLabel
                             active={orderBy === "status"}
@@ -201,11 +213,15 @@ const UserDashboard = () => {
                           <TableRow key={order._id}>
                             <TableCell>{order?._id}</TableCell>
                             <TableCell align="right">
+                              {order?.product?.name}
+                            </TableCell>
+                            <TableCell align="right">
                               ₹{order?.amount}
                             </TableCell>
                             <TableCell align="right">
-                              {order?.gameCredentials?.game}
+                              ₹{order?.paymentId}
                             </TableCell>
+
                             <TableCell align="right">
                               <Chip
                                 label={order?.status}

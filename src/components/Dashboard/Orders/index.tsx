@@ -27,6 +27,7 @@ interface Order {
   amount: number;
   createdAt: string;
   status: string;
+  paymentId: string | null;
   product?: {
     name: string;
   };
@@ -156,6 +157,7 @@ const Orders: React.FC<OrdersProps> = ({ allOrders }) => {
             <MenuItem value="">All</MenuItem>
             <MenuItem value="pending">Pending</MenuItem>
             <MenuItem value="success">Success</MenuItem>
+            <MenuItem value="failed">Failed</MenuItem>
           </Select>
         </FormControl>
         <TextField
@@ -176,6 +178,7 @@ const Orders: React.FC<OrdersProps> = ({ allOrders }) => {
               <TableCell>OrderId</TableCell>
               <TableCell>OrderType</TableCell>
               <TableCell>Email</TableCell>
+              <TableCell>PaymentId</TableCell>
               <TableCell>Price</TableCell>
               <TableCell>Product</TableCell>
               <TableCell>
@@ -197,6 +200,7 @@ const Orders: React.FC<OrdersProps> = ({ allOrders }) => {
                 <TableCell>{order._id}</TableCell>
                 <TableCell>{order.orderType || "N/A"}</TableCell>
                 <TableCell>{order.email}</TableCell>
+                <TableCell>{order.paymentId || "N/A"}</TableCell>
                 <TableCell>₹{order.amount}</TableCell>
                 <TableCell>{order.product?.name || "N/A"}</TableCell>
                 <TableCell>
@@ -205,7 +209,13 @@ const Orders: React.FC<OrdersProps> = ({ allOrders }) => {
                 <TableCell>
                   <Chip
                     label={order.status}
-                    color={order.status === "pending" ? "warning" : "success"}
+                    color={
+                      order.status === "success"
+                        ? "success"
+                        : order.status === "pending"
+                        ? "warning"
+                        : "error"
+                    }
                   />
                 </TableCell>
                 <TableCell>
