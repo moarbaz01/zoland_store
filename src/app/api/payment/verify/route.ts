@@ -115,12 +115,9 @@ export async function POST(req: Request) {
       transactionId: merchantTransactionId,
     });
     if (existingPayment) {
-      return NextResponse.redirect(
-        new URL(
-          `/failed?message=Duplicate transaction detected`,
-          process.env.NEXT_PUBLIC_BASE_URL!
-        ),
-        { status: 302 }
+      return NextResponse.json(
+        { message: "Duplicate transaction detected" },
+        { status: 400 }
       );
     }
 
