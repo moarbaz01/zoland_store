@@ -50,11 +50,7 @@ const statusRequest = async (
 const gameOrderRequest = async (order: any) => {
   const timestamp = Math.floor(Date.now() / 1000);
 
-  // Extract, flatten, and sort all prices (duplicates allowed)
-  const costIds = order.costId.split("&");
-
-  console.log("costIds", costIds, order.costId);
-
+  const costIds = order?.costId?.split("&");
   // Prepare API URL based on the region
   const apiUrl =
     order.region === "brazil"
@@ -62,7 +58,7 @@ const gameOrderRequest = async (order: any) => {
       : "https://www.smile.one/ph/smilecoin/api/createorder";
 
   const responses = await Promise.all(
-    costIds.map(async (cost) => {
+    costIds.map(async (cost: string) => {
       const params = {
         uid: process.env.SMILE_ONE_UID!,
         email: process.env.SMILE_ONE_EMAIL!,
@@ -106,10 +102,25 @@ export async function POST(req: Request) {
     const email = searchParams.get("email");
     const userId = searchParams.get("userId");
     const orderString = searchParams.get("order");
-    if (!orderString) {
+
+    if (!merchantTransactionId || !orderString) {
       return NextResponse.json(
-        { message: "Missing order data" },
+        { message: "Missing transaction or order data" },
         { status: 400 }
+      );
+    }
+
+    // Prevent duplicate transactions
+    const existingPayment = await Payment.findOne({
+      transactionId: merchantTransactionId,
+    });
+    if (existingPayment) {
+      return NextResponse.redirect(
+        new URL(
+          `/failed?message=Duplicate transaction detected`,
+          process.env.NEXT_PUBLIC_BASE_URL!
+        ),
+        { status: 302 }
       );
     }
 
