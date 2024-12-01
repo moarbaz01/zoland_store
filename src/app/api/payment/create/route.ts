@@ -4,6 +4,7 @@ import z from "zod";
 import { v4 as uuid } from "uuid";
 import { generateChecksum } from "@/utils/generateChecksum";
 import { getToken } from "next-auth/jwt";
+import { Payment } from "@/models/payment.model"; // Import your Payment model
 
 const schema = z.object({
   amount: z.string(),
@@ -64,9 +65,23 @@ export async function POST(req: NextRequest) {
     }
 
     const body = result.data;
-    // convert body in to string
+    // convert body into string
     const bodyString = encodeURIComponent(JSON.stringify(body));
-    const transactionId = uuid().slice(10).replaceAll("-", "");
+
+    // Use full UUID for transaction ID
+    const transactionId = uuid(); // Use the full UUID instead of slicing
+
+    // Check if the transaction ID already exists in the database
+    const existingPayment = await Payment.findOne({
+      transactionId, // You can also check by merchantTransactionId if needed
+    });
+
+    if (existingPayment) {
+      return NextResponse.json(
+        { message: "Duplicate transaction detected" },
+        { status: 400 }
+      );
+    }
 
     const data = {
       name: name,
