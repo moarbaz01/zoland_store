@@ -11,7 +11,6 @@ export async function middleware(req: NextRequest) {
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET! });
 
   if (!token) {
-
     if (pathname === loginPageUrl) {
       return NextResponse.next();
     }
@@ -38,12 +37,8 @@ export async function middleware(req: NextRequest) {
   }
 
   return NextResponse.next();
-
 }
 
 export const config = {
-  matcher: [
-    "/dashboard/:path*",
-    "/user-dashboard/:path*",
-  ],
+  matcher: "/:path*",
 };

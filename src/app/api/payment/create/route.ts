@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
     const bodyString = encodeURIComponent(JSON.stringify(body));
 
     // Use full UUID for transaction ID
-    const transactionId = uuid().replace(/-/g, '').slice(0, 8);
+    const transactionId = uuid().replace(/-/g, "").slice(0, 8);
 
     // Check if the transaction ID already exists in the database
     const existingPayment = await Payment.findOne({

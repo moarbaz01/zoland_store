@@ -6,6 +6,7 @@ import Navbar from "@/components/ui/Navbar";
 import Footer from "@/components/ui/Footer";
 import Provider from "@/components/Provider";
 import { Toaster } from "react-hot-toast";
+import MaintenancePage from "@/components/Maintenance";
 
 export const metadata: Metadata = {
   title: "Zoland Store",
@@ -26,13 +27,19 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${popins.variable} antialiased `}>
-        <NextTopLoader color="#ab20fd" />
-        <Provider>
-          <Toaster />
-          <Navbar /> {/* Conditionally render Navbar */}
-          {children}
-          <Footer />
-        </Provider>
+        {process.env.NEXT_PUBLIC_MAINTENANCE_MODE === "true" ? (
+          <MaintenancePage />
+        ) : (
+          <>
+            <NextTopLoader color="#ab20fd" />
+            <Provider>
+              <Toaster />
+              <Navbar /> {/* Conditionally render Navbar */}
+              {children}
+              <Footer />
+            </Provider>
+          </>
+        )}
       </body>
     </html>
   );
