@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 // Connect to the database
+export const dynamic = "force-dynamic";
 
 // Zod schema for validation
 const productSchema = z.object({

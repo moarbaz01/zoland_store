@@ -1,8 +1,4 @@
-import Loader from "@/components/Loader";
-import dynamic from "next/dynamic";
-const Analytics = dynamic(() => import("@/components/Dashboard/Analytics"), {
-  loading: () => <Loader />,
-});
+import Analytics from "@/components/Dashboard/Analytics";
 
 const Page = () => {
   return <Analytics />;

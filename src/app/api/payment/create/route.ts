@@ -1,3 +1,4 @@
+import { dbConnect } from "@/lib/database";
 import axios from "axios";
 import { NextRequest, NextResponse } from "next/server";
 import z from "zod";
@@ -5,7 +6,6 @@ import { v4 as uuid } from "uuid";
 import { generateChecksum } from "@/utils/generateChecksum";
 import { getToken } from "next-auth/jwt";
 import { Payment } from "@/models/payment.model"; // Import your Payment model
-import { dbConnect } from "@/lib/database";
 
 const schema = z.object({
   amount: z.string(),

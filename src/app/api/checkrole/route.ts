@@ -1,8 +1,8 @@
+import { dbConnect } from "@/lib/database";
 import { NextResponse } from "next/server";
 import z from "zod";
 import axios from "axios";
 import { generateSign } from "@/utils/hash";
-import { dbConnect } from "@/lib/database";
 
 const schema = z.object({
   zoneId: z.string(),

@@ -2,22 +2,27 @@ import GameComponent from "@/components/GameComponent";
 
 const fetchProducts = async () => {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/product`, {
-      cache: "no-store", // Ensures fresh data on every request
-    });
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/product`);
     if (!res.ok) {
       throw new Error("Failed to fetch data");
     }
-    return await res.json();
+    const data = await res.json();
+    return data;
   } catch (err) {
-    console.error("Error fetching products:", err);
-    throw new Error("Failed to fetch data");
+    console.error(err);
+    return null;
   }
 };
 
 const TrendingGames = async () => {
   const products = await fetchProducts();
-
+  if (!products) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <h1 className="text-2xl font-bold">No Products Found</h1>
+      </div>
+    );
+  }
   return (
     <div className="py-12 px-4 sm:px-6">
       <div className="max-w-screen-xl mx-auto">

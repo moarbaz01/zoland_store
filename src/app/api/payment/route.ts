@@ -3,6 +3,8 @@ import { Payment } from "@/models/payment.model";
 import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 // **GET**: Retrieve orders
 export async function GET(req: NextRequest) {
   try {
@@ -33,9 +35,7 @@ export async function GET(req: NextRequest) {
     } else {
       // Fetch all orders
       orders = await Payment.find();
-
     }
-
 
     return NextResponse.json(orders, { status: 200 });
   } catch (error) {

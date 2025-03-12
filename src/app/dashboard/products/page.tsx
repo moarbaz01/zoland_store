@@ -32,8 +32,6 @@ const Page = () => {
       }
     };
 
-  
-
     const fetchProductsList = async () => {
       try {
         const res = await axios(

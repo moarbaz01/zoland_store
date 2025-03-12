@@ -18,7 +18,6 @@ export default function Page({ params }: { params: { productId: string } }) {
             headers: {
               "Content-Type": "application/json",
             },
-            cache: "no-store", // Disables caching to ensure fresh data
           }
         );
 
