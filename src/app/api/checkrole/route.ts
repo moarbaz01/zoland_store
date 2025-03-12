@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import z from "zod";
 import axios from "axios";
 import { generateSign } from "@/utils/hash";
+import { dbConnect } from "@/lib/database";
 
 const schema = z.object({
   zoneId: z.string(),
@@ -11,6 +12,8 @@ const schema = z.object({
 });
 export async function POST(req: Request) {
   try {
+    // Connect to the database
+    await dbConnect();
     const body = await req.json();
     const result = schema.safeParse(body);
     if (!result.success) {

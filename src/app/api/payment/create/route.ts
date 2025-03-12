@@ -5,6 +5,7 @@ import { v4 as uuid } from "uuid";
 import { generateChecksum } from "@/utils/generateChecksum";
 import { getToken } from "next-auth/jwt";
 import { Payment } from "@/models/payment.model"; // Import your Payment model
+import { dbConnect } from "@/lib/database";
 
 const schema = z.object({
   amount: z.string(),
@@ -43,6 +44,7 @@ const payRequest = async (payloadMain: string, checksum: string) => {
 // Create PhonePe payment
 export async function POST(req: NextRequest) {
   try {
+    await dbConnect();
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
     // If the user is not authenticated, return Unauthorized

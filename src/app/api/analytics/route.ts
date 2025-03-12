@@ -1,3 +1,4 @@
+import { dbConnect } from "@/lib/database";
 import { Order } from "@/models/order.model";
 import { Product } from "@/models/product.model";
 import { User } from "@/models/user.model";
@@ -6,6 +7,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   try {
+    await dbConnect();
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
     // If the user is not authenticated, return Unauthorized

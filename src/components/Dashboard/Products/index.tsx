@@ -21,7 +21,7 @@ import Image from "next/image";
 import toast from "react-hot-toast";
 import axios from "axios";
 
-const Products = ({ allProducts }) => {
+const Products = ({ allProducts, productsList }) => {
   const router = useRouter();
   const [products, setProducts] = useState(allProducts);
   const [search, setSearch] = useState("");
@@ -158,6 +158,20 @@ const Products = ({ allProducts }) => {
           </TableBody>
         </Table>
       </TableContainer>
+
+      <div className="mt-6">
+        <h1 className="text-primary font-bold mb-2 text-xl">Products List</h1>
+        <ul className="flex flex-col gap-4">
+          {productsList.map((product) => (
+            <li key={product.id}>
+              <p>id : {product.id}</p>
+              <p>spu : {product.spu}</p>
+              <p>price : {product.price}</p>
+              <p>discount : {product.discount}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 };

@@ -4,8 +4,6 @@ import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
-// Connect to the database
-dbConnect();
 
 // Zod schema for validation
 const orderSchema = z.object({
@@ -31,6 +29,7 @@ const orderSchema = z.object({
 // **GET**: Retrieve orders
 export async function GET(req: NextRequest) {
   try {
+    await dbConnect();
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
     // If the user is not authenticated, return Unauthorized

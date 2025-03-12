@@ -30,6 +30,7 @@ export default function Page({ params }: { params: { productId: string } }) {
       }
     };
 
+    
     fetchProduct();
   }, [params.productId]);
 

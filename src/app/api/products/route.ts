@@ -4,6 +4,7 @@ import { Product } from "@/models/product.model";
 export async function GET() {
   try {
     const products = await Product.find({ isDeleted: false });
+
     if (!products) {
       return NextResponse.json({ error: "No products found" }, { status: 404 });
     }

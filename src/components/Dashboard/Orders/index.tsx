@@ -31,6 +31,10 @@ interface Order {
   product?: {
     name: string;
   };
+  gameCredentials?: {
+    userId: string;
+    zoneId?: string;
+  };
   orderType?: string;
 }
 
@@ -181,6 +185,8 @@ const Orders: React.FC<OrdersProps> = ({ allOrders }) => {
               <TableCell>PaymentId</TableCell>
               <TableCell>Price</TableCell>
               <TableCell>Product</TableCell>
+              <TableCell>Game Id</TableCell>
+              <TableCell>Zone Id</TableCell>
               <TableCell>
                 <TableSortLabel
                   active={orderBy === "createdAt"}
@@ -203,6 +209,12 @@ const Orders: React.FC<OrdersProps> = ({ allOrders }) => {
                 <TableCell>{order.paymentId || "N/A"}</TableCell>
                 <TableCell>₹{order.amount}</TableCell>
                 <TableCell>{order.product?.name || "N/A"}</TableCell>
+                <TableCell>{order.gameCredentials.userId}</TableCell>
+                <TableCell>
+                  {order.orderType === "API Order"
+                    ? order?.gameCredentials?.zoneId
+                    : "N/A"}
+                </TableCell>
                 <TableCell>
                   {new Date(order.createdAt).toLocaleString()}
                 </TableCell>

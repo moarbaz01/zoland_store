@@ -6,7 +6,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 // Connect to the database
-dbConnect();
 
 // Zod schema for validation
 const productSchema = z.object({
@@ -31,6 +30,7 @@ const productSchema = z.object({
 // **POST**: Create a new product
 export async function POST(req: NextRequest) {
   try {
+    await dbConnect();
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
     // If the user is not authenticated, return Unauthorized
@@ -95,6 +95,7 @@ export async function POST(req: NextRequest) {
 // **GET**: Retrieve products
 export async function GET(req: Request) {
   try {
+    await dbConnect();
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
 
@@ -109,7 +110,6 @@ export async function GET(req: Request) {
         );
       }
     } else {
-      // Fetch all products (excluding deleted ones)
       products = await Product.find({ isDeleted: false });
     }
 
@@ -126,6 +126,8 @@ export async function GET(req: Request) {
 // **PUT**: Update a product by ID
 export async function PUT(req: NextRequest) {
   try {
+    await dbConnect();
+
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
     // If the user is not authenticated, return Unauthorized
@@ -209,6 +211,7 @@ export async function PUT(req: NextRequest) {
 // **DELETE**: Soft delete a product by ID
 export async function DELETE(req: NextRequest) {
   try {
+    await dbConnect();
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
     // If the user is not authenticated, return Unauthorized

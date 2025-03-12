@@ -16,20 +16,7 @@ const fetchProducts = async () => {
 };
 
 const TrendingGames = async () => {
-  let products;
-
-  try {
-    products = await fetchProducts();
-  } catch (error) {
-    return (
-      <div className="py-12 px-4 sm:px-6">
-        <div className="max-w-screen-xl mx-auto">
-          <h2 className="text-xl font-bold text-white">TRENDING GAMES</h2>
-          <div className="text-red-500 mt-4">Error: {error.message}</div>
-        </div>
-      </div>
-    );
-  }
+  const products = await fetchProducts();
 
   return (
     <div className="py-12 px-4 sm:px-6">
